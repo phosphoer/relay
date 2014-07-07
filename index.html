@@ -11,23 +11,35 @@
     </script>
 
     <!-- Containers -->
+    <div id='channelContainer'></div>
     <div id='logContainer'></div>
 
     <!-- User input box -->
     <input class='user-input' placeholder="Type here" type='text'></input>
 
     <!-- Templates -->
+    <!-- Channels window template -->
+    <script id='channelsTemplate' type='text/ractive'>
+      <div class='channel-window'>
+        {{#user.channels}}
+          <div class='channel-item' on-click='activate'>
+            <span class='channel-item-name'>{{name}}</span>
+          </div>
+        {{/user.channels}}
+      </div>
+    </script>
+
     <!-- Log window template -->
     <script id='logTemplate' type='text/ractive'>
       <div class='log-window'>
-        {{#logs}}
+        {{#user.currentChannel.logs}}
           <div class='log-item-wrapper'>
             <div class='log-item'>
               <span class='log-item-from'>{{sender}}</span>
               <span class='log-item-message'>{{message}}</span>
             </div>
           </div>
-        {{/logs}}
+        {{/user.currentChannel.logs}}
       </div>
     </script>
 
