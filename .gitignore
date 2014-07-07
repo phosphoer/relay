@@ -1,0 +1,8 @@
+node_modules/
+.app/
+app/
+*.sublime-workspace
+*.exe
+*.dll
+*.pak
+app.js

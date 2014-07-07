@@ -1,0 +1,16 @@
+{
+  "name": "irsee",
+  "main": "index.html",
+  "webkit": {
+    "page-cache": false
+  },
+  "window": {
+    "title": "IRC"
+  },
+  "devDependencies": {
+    "gulp": "^3.8.5",
+    "gulp-concat": "^2.2.0",
+    "gulp-zip": "^0.4.0",
+    "irc": "^0.3.7"
+  }
+}

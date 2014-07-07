@@ -1,0 +1,46 @@
+<html>
+  <head>
+    <script src='app.js'></script>
+    <link rel='stylesheet' href='style.css' />
+    <script src='ractive.js'></script>
+  </head>
+
+  <body>
+    <script>
+      window.addEventListener("load", main);
+    </script>
+
+    <!-- Containers -->
+    <div id='logContainer'></div>
+
+    <!-- User input box -->
+    <input class='user-input' placeholder="Type here" type='text'></input>
+
+    <!-- Templates -->
+    <!-- Log window template -->
+    <script id='logTemplate' type='text/ractive'>
+      <div class='log-window'>
+        {{#logs}}
+          <div class='log-item-wrapper'>
+            <div class='log-item'>
+              <span class='log-item-from'>{{sender}}</span>
+              <span class='log-item-message'>{{message}}</span>
+            </div>
+          </div>
+        {{/logs}}
+      </div>
+    </script>
+
+    <script>
+      var path = './style.css';
+      var fs = require('fs');
+
+      fs.watch(path, function()
+      {
+        if (location && location.reload)
+          location.reload();
+      });
+    </script>
+
+  </body>
+</html>
