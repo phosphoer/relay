@@ -1,6 +1,14 @@
 var irc = require('irc');
 var client = new irc.Client('', 'unnamed-user');
 
+//
+// Some classes
+//
+var User = function(name)
+{
+  this.name = name;
+};
+
 var Log = function(sender, message)
 {
   this.sender = sender || 'no one';
@@ -11,6 +19,7 @@ var Channel = function(name)
 {
   this.name = name || 'channel';
   this.logs = [];
+  this.users = [];
 
   this.activate = function()
   {
@@ -19,19 +28,34 @@ var Channel = function(name)
   };
 };
 
+// The default 'channel'
 var defaultChannel = new Channel('default');
 
+//
+// Main app model
+//
 var clientInfo =
 {
   nick: 'relay-user-1',
   userName: 'unnamed-user',
   channels: [defaultChannel],
-  currentChannel: defaultChannel
+  currentChannel: defaultChannel,
+
+  getChannel: function(name)
+  {
+    for (var i = 0; i < this.channels.length; ++i)
+      if (this.channels[i].name === name)
+        return this.channels[i];
+  }
 };
 
 var channelsUI = null;
+var usersUI = null;
 var logUI = null;
 
+//
+// Woo main!
+//
 function main()
 {
   // Build channels window
@@ -44,6 +68,14 @@ function main()
   channelsUI.on('activate', function(e)
   {
     e.context.activate();
+  });
+
+  // Build user window
+  usersUI = new Ractive(
+  {
+    el: 'usersContainer',
+    template: '#usersTemplate',
+    data: {user: clientInfo}
   });
 
   // Build log window
@@ -129,7 +161,15 @@ messages.motd = function(motd)
 
 messages.names = function(channel, nicks)
 {
+  var chan = clientInfo.getChannel(channel);
 
+  if (!chan)
+    return;
+
+  chan.users = [];
+  for (var nick in nicks)
+    chan.users.push(new User(nick));
+  usersUI.update();
 };
 
 messages.message = function(from, to, text)
@@ -152,6 +192,13 @@ messages.join = function(channel, nick)
     clientInfo.currentChannel = chan;
     logUI.update();
   }
+  else
+  {
+    var chan = clientInfo.getChannel(channel);
+    chan.users.push(new User(nick));
+  }
+
+  usersUI.update();
 };
 
 messages.part = function(channel, nick, reason)
@@ -172,6 +219,20 @@ messages.part = function(channel, nick, reason)
       }
     }
   }
+  else
+  {
+    var chan = clientInfo.getChannel(channel);
+    for (var i = 0; i < chan.users.length; ++i)
+    {
+      if (chan.users[i].name === nick)
+      {
+        chan.users.splice(i, 1);
+        break;
+      }
+    }
+  }
+
+  usersUI.update();
 };
 
 messages.pm = function(from, text)

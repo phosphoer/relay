@@ -13,6 +13,7 @@
     <!-- Containers -->
     <div id='channelContainer'></div>
     <div id='logContainer'></div>
+    <div id='usersContainer'></div>
 
     <!-- User input box -->
     <input class='user-input' placeholder="Type here" type='text'></input>
@@ -26,6 +27,17 @@
             <span class='channel-item-name'>{{name}}</span>
           </div>
         {{/user.channels}}
+      </div>
+    </script>
+
+    <!-- Users window template -->
+    <script id='usersTemplate' type='text/ractive'>
+      <div class='users-window'>
+        {{#user.currentChannel.users}}
+          <div class='users-item'>
+            <span class='users-item-name'>{{name}}</span>
+          </div>
+        {{/user.currentChannel.users}}
       </div>
     </script>
 
