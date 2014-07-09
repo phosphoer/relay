@@ -367,6 +367,8 @@ commands.message = function(to, text)
 {
   client.say(to, text);
 };
+commands.msg = commands.message;
+commands.pm = commands.message;
 
 commands.join = function(channel)
 {
