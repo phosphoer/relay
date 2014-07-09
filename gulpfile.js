@@ -29,6 +29,12 @@
   gulp.task("release", ["default"], function()
   {
     gulp.src(appFiles)
+    .pipe(gulp.dest("app/package/"));
+
+    gulp.src("./node_modules/irc/**/*")
+    .pipe(gulp.dest("app/package/node_modules/irc/"));
+
+    gulp.src("app/package/**/*")
     .pipe(zip("package.nw"))
     .pipe(gulp.dest("app/"));
   });
