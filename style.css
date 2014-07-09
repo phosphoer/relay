@@ -137,6 +137,20 @@ body
 {
 }
 
+.log-item-image
+{
+  display: block;
+  margin: 10px 0;
+  border-radius: 2px;
+  max-width: 500px;
+  max-height: 300px;
+}
+
+.log-item-link
+{
+  display: inline;
+}
+
 .user-input
 {
   color: #ddd;

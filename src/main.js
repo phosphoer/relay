@@ -1,4 +1,5 @@
 var irc = require('irc');
+var gui = require('nw.gui');
 var client = new irc.Client('', 'unnamed-user');
 
 //
@@ -13,6 +14,28 @@ var Log = function(sender, message)
 {
   this.sender = sender || 'no one';
   this.message = message || 'nooothinnnggg';
+  this.imgSrc = '';
+  this.imgDisplay = 'none';
+
+  // Detect a message with a link
+  var match = message.match(/((http:.+)|(https:.+))/);
+  if (match && match.index >= 0)
+  {
+    var url = match[1];
+
+    if (/(.png|.gif|.jpg|.jpeg)$/.test(url))
+    {
+      this.imgSrc = url;
+      this.imgDisplay = '';
+      this.message = this.message.replace(url, '');
+    }
+    else
+    {
+      this.linkHref = url;
+      this.linkDisplay = '';
+      this.message = this.message.replace(url, '');
+    }
+  }
 };
 
 var Channel = function(name)
@@ -25,6 +48,13 @@ var Channel = function(name)
   {
     clientInfo.currentChannel = this;
     logUI.update();
+  };
+
+  this.getUser = function(name)
+  {
+    for (var i = 0; i < this.users.length; ++i)
+      if (this.users[i].name === name)
+        return this.users[i];
   };
 };
 
@@ -58,6 +88,17 @@ var logUI = null;
 //
 function main()
 {
+  // Handle opening links in a new browser
+  var win = gui.Window.get();
+  win.on('new-win-policy', function(frame, url, policy)
+  {
+    if (url.indexOf("http") >= 0)
+    {
+      policy.ignore();
+      gui.Shell.openExternal(url);
+    }
+  });
+
   // Build channels window
   channelsUI = new Ractive(
   {
@@ -237,6 +278,25 @@ messages.part = function(channel, nick, reason)
 
 messages.pm = function(from, text)
 {
+  clientInfo.currentChannel.logs.push(new Log('PM ' + from, text));
+};
+
+messages.nick = function(oldNick, newNick, channels)
+{
+  for (var i = 0; i < channels.length; ++i)
+  {
+    var chan = clientInfo.getChannel(channels[i]);
+    var user = chan.getUser(oldNick);
+    user.name = newNick;
+  }
+
+  var log = new Log('server', oldNick + ' is now known as ' + newNick);
+  clientInfo.currentChannel.logs.push(log);
+
+  if (oldNick === clientInfo.nick)
+    clientInfo.nick = newNick;
+
+  usersUI.update();
 };
 
 messages.error = function(message)
@@ -270,4 +330,15 @@ commands.part = function(channel, message)
     client.part(clientInfo.currentChannel.name, message);
   else
     client.part(channel, message);
+};
+
+commands.nick = function(nick)
+{
+  client.send("NICK", nick);
+
+  // We can change our nick with no confirmation in default channel
+  if (clientInfo.currentChannel === defaultChannel)
+  {
+    clientInfo.nick = nick;
+  }
 };

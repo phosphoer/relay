@@ -49,6 +49,8 @@
             <div class='log-item'>
               <span class='log-item-from'>{{sender}}</span>
               <span class='log-item-message'>{{message}}</span>
+              <a target="_blank" class='log-item-link' href='{{linkHref}}' style='display: {{linkDisplay}};'>{{linkHref}}</a>
+              <a target="_blank" href='{{imgSrc}}' style='display: {{imgDisplay}};'><img class='log-item-image' src='{{imgSrc}}' /></a>
             </div>
           </div>
         {{/user.currentChannel.logs}}
@@ -62,7 +64,10 @@
       fs.watch(path, function()
       {
         if (location && location.reload)
+        {
+          require('nw.gui').Window.get().removeAllListeners('new-win-policy');
           location.reload();
+        }
       });
     </script>
 
