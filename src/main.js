@@ -30,6 +30,7 @@ var Log = function(sender, message)
     if (/(.png|.gif|.jpg|.jpeg)$/.test(url))
     {
       this.imgSrc = url;
+      this.linkHref = url;
       this.imgDisplay = '';
       this.message = this.message.replace(url, '');
     }
@@ -52,13 +53,22 @@ var Log = function(sender, message)
 
   this.activate = function(e)
   {
+    // Handle right clicking an image to hide it
+    if (e.original.button === 2 && this.imgSrc)
+    {
+      this.imgDisplay = 'none';
+      this.linkDisplay = '';
+      logUI.update();
+    }
+
+    // Handle clicking a suggested IRC server link
     if (!clientInfo.connected && this.isIrcLink)
     {
       if (e.original.button === 2)
       {
-        var save = JSON.parse(localStorage['relay-save']);
+        var save = getSave();
         delete save.servers[this.message];
-        localStorage['relay-save'] = JSON.stringify(save);
+        setSave(save);
         clientInfo.currentChannel.logs.splice(clientInfo.currentChannel.logs.indexOf(this), 1);
       }
       else
@@ -89,6 +99,22 @@ var Channel = function(name)
   };
 };
 
+//
+// Saving functions
+//
+function getSave()
+{
+  if (!localStorage['relay-save'])
+    localStorage['relay-save'] = JSON.stringify({});
+  return JSON.parse(localStorage['relay-save']);
+}
+
+function setSave(save)
+{
+  localStorage['relay-save'] = JSON.stringify(save);
+}
+
+
 // The default 'channel'
 var defaultChannel = new Channel('default');
 
@@ -97,7 +123,7 @@ var defaultChannel = new Channel('default');
 //
 var clientInfo =
 {
-  nick: 'relay-user-1',
+  nick: getSave().nick || 'relay-user',
   userName: 'unnamed-user',
   channels: [defaultChannel],
   currentChannel: defaultChannel,
@@ -112,7 +138,7 @@ var clientInfo =
   addLog: function(log)
   {
     this.currentChannel.logs.push(log);
-    var logWin = document.querySelector(".log-window");
+    var logWin = document.querySelector('.log-window');
     logWin.scrollTop = logWin.scrollHeight;
   }
 };
@@ -126,20 +152,22 @@ var logUI = null;
 //
 function main()
 {
-  // Save info
-  var save = localStorage['relay-save'];
-  if (!save)
-    localStorage['relay-save'] = JSON.stringify({});
-
   // Handle opening links in a new browser
   var win = gui.Window.get();
   win.on('new-win-policy', function(frame, url, policy)
   {
-    if (url.indexOf("http") >= 0)
+    if (url.indexOf('http') >= 0)
     {
       policy.ignore();
       gui.Shell.openExternal(url);
     }
+  });
+
+  // Handle closing the window
+  win.on('close', function()
+  {
+    client.disconnect('quit');
+    this.close(true);
   });
 
   // Build channels window
@@ -178,7 +206,7 @@ function main()
   clientInfo.addLog(new Log('app', 'Welcome to Relay!'));
 
   // Show recent servers
-  save = JSON.parse(localStorage['relay-save']);
+  var save = getSave();
   if (save.servers)
   {
     clientInfo.addLog(new Log('app', 'Recent servers...'));
@@ -220,7 +248,6 @@ function parseCommand(message)
   if (message[0] !== '/' && message[0] !== '\\')
     return false;
 
-  var isCommand = true;
   var parts = message.split(' ');
   var command = parts[0].slice(1);
   var args = parts.slice(1);
@@ -231,13 +258,10 @@ function parseCommand(message)
   }
   else
   {
-    isCommand = false;
+    clientInfo.addLog(new Log('x', message));
   }
 
-  if (isCommand)
-    clientInfo.addLog(new Log('>', message));
-
-  return isCommand;
+  return true;
 }
 
 function setupListeners()
@@ -256,12 +280,12 @@ messages.registered = function()
   clientInfo.addLog(log);
   clientInfo.connected = true;
 
-  var save = JSON.parse(localStorage['relay-save']);
+  var save = getSave();
   if (!save.servers)
     save.servers = {};
   save.servers[clientInfo.currentServer] = true;
 
-  localStorage['relay-save'] = JSON.stringify(save);
+  setSave(save);
 };
 
 messages.motd = function(motd)
@@ -333,40 +357,73 @@ messages.part = function(channel, nick, reason)
   else
   {
     var chan = clientInfo.getChannel(channel);
-    for (var i = 0; i < chan.users.length; ++i)
-    {
-      if (chan.users[i].name === nick)
-      {
-        chan.users.splice(i, 1);
-        break;
-      }
-    }
+    var user = chan.getUser(nick);
+    var index = chan.users.indexOf(user);
+    chan.users.splice(index, 1);
   }
 
   usersUI.update();
 };
 
-messages.pm = function(from, text)
-{
-  clientInfo.addLog(new Log('PM ' + from, text));
-};
+// This seems to be redundant with the message event?
+// messages.pm = function(from, text)
+// {
+//   clientInfo.addLog(new Log('PM ' + from, text));
+// };
 
 messages.nick = function(oldNick, newNick, channels)
 {
   for (var i = 0; i < channels.length; ++i)
   {
     var chan = clientInfo.getChannel(channels[i]);
-    var user = chan.getUser(oldNick);
-    user.name = newNick;
+    if (chan)
+    {
+      var user = chan.getUser(oldNick);
+      user.name = newNick;
+    }
   }
 
   var log = new Log('server', oldNick + ' is now known as ' + newNick);
   clientInfo.addLog(log);
 
   if (oldNick === clientInfo.nick)
+  {
     clientInfo.nick = newNick;
 
+    var save = getSave();
+    save.nick = nick;
+    setSave(save);
+  }
+
   usersUI.update();
+};
+
+messages.quit = function(nick, reason, channels)
+{
+  for (var i = 0; i < channels.length; ++i)
+  {
+    var chan = clientInfo.getChannel(channels[i]);
+    if (chan)
+    {
+      var user = chan.getUser(nick);
+      var index = chan.users.indexOf(user);
+      chan.users.splice(index, 1);
+    }
+  }
+};
+
+messages.raw = function(message)
+{
+  console.log(message);
+
+  if (message.command === 'err_nicknameinuse')
+  {
+    clientInfo.addLog(new Log('error', 'That nickname is already in use, please choose another'));
+  }
+  else if (message.command === 'err_erroneusnickname')
+  {
+    clientInfo.addLog(new Log('error', 'That nickname is invalid, please choose another'));
+  }
 };
 
 messages.error = function(message)
@@ -386,12 +443,22 @@ commands.connect = function(server, port)
   }
   catch (e)
   {
-    clientInfo.addLog(new Log('Error', JSON.stringify(e)));
+    clientInfo.addLog(new Log('error', JSON.stringify(e)));
   }
   clientInfo.currentServer = server;
   setupListeners();
 };
 commands.server = commands.connect;
+
+commands.disconnect = function(message)
+{
+  client.disconnect(message, function()
+  {
+    clientInfo.addLog(new Log('app', 'disconnected'));
+  });
+};
+commands.dc = commands.disconnect;
+commands.quit = commands.disconnect;
 
 commands.message = function(to, text)
 {
@@ -415,11 +482,22 @@ commands.part = function(channel, message)
 
 commands.nick = function(nick)
 {
-  client.send("NICK", nick);
+  client.send('NICK', nick);
 
   // We can change our nick with no confirmation in default channel
   if (clientInfo.currentChannel === defaultChannel)
   {
     clientInfo.nick = nick;
+    clientInfo.addLog(new Log('app', 'Set nick to ' + nick));
+    var save = getSave();
+    save.nick = nick;
+    setSave(save);
   }
 };
+
+commands.clear = function()
+{
+  clientInfo.currentChannel.logs = [];
+  logUI.update();
+};
+commands.cls = commands.clear;

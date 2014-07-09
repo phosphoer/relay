@@ -150,6 +150,8 @@ body
 .log-item-link
 {
   display: inline;
+  text-decoration: none;
+  color: #5f5;
 }
 
 .user-input
