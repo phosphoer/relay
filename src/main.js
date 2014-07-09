@@ -50,11 +50,21 @@ var Log = function(sender, message)
     this.isIrcLink = true;
   }
 
-  this.activate = function()
+  this.activate = function(e)
   {
     if (!clientInfo.connected && this.isIrcLink)
     {
-      commands.connect(this.ircLink);
+      if (e.original.button === 2)
+      {
+        var save = JSON.parse(localStorage['relay-save']);
+        delete save.servers[this.message];
+        localStorage['relay-save'] = JSON.stringify(save);
+        clientInfo.currentChannel.logs.splice(clientInfo.currentChannel.logs.indexOf(this), 1);
+      }
+      else
+      {
+        commands.connect(this.ircLink);
+      }
     }
   };
 };
@@ -154,7 +164,7 @@ function main()
   });
   logUI.on('activate', function(e)
   {
-    e.context.activate();
+    e.context.activate(e);
   });
 
   // Default message
@@ -168,6 +178,10 @@ function main()
     for (var i in save.servers)
     {
       defaultChannel.logs.push(new Log('app', i));
+
+      // Force log to be an IRC link
+      defaultChannel.logs[defaultChannel.logs.length - 1].isIrcLink = true;
+      defaultChannel.logs[defaultChannel.logs.length - 1].ircLink = i;
     }
   }
 
@@ -234,6 +248,13 @@ messages.registered = function()
   var log = new Log('server', 'connected');
   clientInfo.currentChannel.logs.push(log);
   clientInfo.connected = true;
+
+  var save = JSON.parse(localStorage['relay-save']);
+  if (!save.servers)
+    save.servers = {};
+  save.servers[clientInfo.currentServer] = true;
+
+  localStorage['relay-save'] = JSON.stringify(save);
 };
 
 messages.motd = function(motd)
@@ -352,15 +373,16 @@ messages.error = function(message)
 var commands = {};
 commands.connect = function(server, port)
 {
-  client = new irc.Client(server, clientInfo.nick);
+  try
+  {
+    client = new irc.Client(server, clientInfo.nick);
+  }
+  catch (e)
+  {
+    clientInfo.currentChannel.logs.push(new Log('Error', JSON.stringify(e)));
+  }
+  clientInfo.currentServer = server;
   setupListeners();
-
-  var save = JSON.parse(localStorage['relay-save']);
-  if (!save.servers)
-    save.servers = {};
-  save.servers[server] = true;
-
-  localStorage['relay-save'] = JSON.stringify(save);
 };
 
 commands.message = function(to, text)

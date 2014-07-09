@@ -16,7 +16,7 @@
     <div id='usersContainer'></div>
 
     <!-- User input box -->
-    <input class='user-input' placeholder="Type here" type='text'></input>
+    <input class='user-input' autofocus placeholder="Type here" type='text'></input>
 
     <!-- Templates -->
     <!-- Channels window template -->
@@ -45,7 +45,7 @@
     <script id='logTemplate' type='text/ractive'>
       <div class='log-window'>
         {{#user.currentChannel.logs}}
-          <div class='log-item-wrapper' on-click='activate'>
+          <div class='log-item-wrapper' on-mousedown='activate'>
             <div class='log-item'>
               <span class='log-item-from'>{{sender}}</span>
               <span class='log-item-message'>{{message}}</span>
