@@ -16,6 +16,10 @@ var Log = function(sender, message)
   this.message = message || 'nooothinnnggg';
   this.imgSrc = '';
   this.imgDisplay = 'none';
+  this.linkHref = '';
+  this.linkDisplay = 'none';
+  this.ircLink = '';
+  this.isIrcLink = false;
 
   // Detect a message with a link
   var match = message.match(/((http:.+)|(https:.+))/);
@@ -36,6 +40,23 @@ var Log = function(sender, message)
       this.message = this.message.replace(url, '');
     }
   }
+
+  // Detect a message with an irc server link
+  match = message.match(/(irc.+)/);
+  if (match && match.index >= 0)
+  {
+    var url = match[1];
+    this.ircLink = url;
+    this.isIrcLink = true;
+  }
+
+  this.activate = function()
+  {
+    if (!clientInfo.connected && this.isIrcLink)
+    {
+      commands.connect(this.ircLink);
+    }
+  };
 };
 
 var Channel = function(name)
@@ -88,6 +109,11 @@ var logUI = null;
 //
 function main()
 {
+  // Save info
+  var save = localStorage['relay-save'];
+  if (!save)
+    localStorage['relay-save'] = JSON.stringify({});
+
   // Handle opening links in a new browser
   var win = gui.Window.get();
   win.on('new-win-policy', function(frame, url, policy)
@@ -126,9 +152,24 @@ function main()
     template: '#logTemplate',
     data: {user: clientInfo}
   });
+  logUI.on('activate', function(e)
+  {
+    e.context.activate();
+  });
 
   // Default message
   defaultChannel.logs.push(new Log('app', 'Welcome to Relay!'));
+
+  // Show recent servers
+  save = JSON.parse(localStorage['relay-save']);
+  if (save.servers)
+  {
+    defaultChannel.logs.push(new Log('app', 'Recent servers...'));
+    for (var i in save.servers)
+    {
+      defaultChannel.logs.push(new Log('app', i));
+    }
+  }
 
   var input = document.querySelector('.user-input');
   input.addEventListener('keydown', function(e)
@@ -192,6 +233,7 @@ messages.registered = function()
 {
   var log = new Log('server', 'connected');
   clientInfo.currentChannel.logs.push(log);
+  clientInfo.connected = true;
 };
 
 messages.motd = function(motd)
@@ -312,6 +354,13 @@ commands.connect = function(server, port)
 {
   client = new irc.Client(server, clientInfo.nick);
   setupListeners();
+
+  var save = JSON.parse(localStorage['relay-save']);
+  if (!save.servers)
+    save.servers = {};
+  save.servers[server] = true;
+
+  localStorage['relay-save'] = JSON.stringify(save);
 };
 
 commands.message = function(to, text)

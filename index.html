@@ -45,7 +45,7 @@
     <script id='logTemplate' type='text/ractive'>
       <div class='log-window'>
         {{#user.currentChannel.logs}}
-          <div class='log-item-wrapper'>
+          <div class='log-item-wrapper' on-click='activate'>
             <div class='log-item'>
               <span class='log-item-from'>{{sender}}</span>
               <span class='log-item-message'>{{message}}</span>

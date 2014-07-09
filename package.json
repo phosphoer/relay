@@ -1,11 +1,12 @@
 {
-  "name": "irsee",
+  "name": "relay-irc",
   "main": "index.html",
   "webkit": {
     "page-cache": false
   },
   "window": {
-    "title": "IRC"
+    "title": "Relay",
+    "toolbar": false
   },
   "devDependencies": {
     "gulp": "^3.8.5",
