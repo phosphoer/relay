@@ -107,6 +107,13 @@ var clientInfo =
     for (var i = 0; i < this.channels.length; ++i)
       if (this.channels[i].name === name)
         return this.channels[i];
+  },
+
+  addLog: function(log)
+  {
+    this.currentChannel.logs.push(log);
+    var logWin = document.querySelector(".log-window");
+    logWin.scrollTop = logWin.scrollHeight;
   }
 };
 
@@ -168,16 +175,16 @@ function main()
   });
 
   // Default message
-  defaultChannel.logs.push(new Log('app', 'Welcome to Relay!'));
+  clientInfo.addLog(new Log('app', 'Welcome to Relay!'));
 
   // Show recent servers
   save = JSON.parse(localStorage['relay-save']);
   if (save.servers)
   {
-    defaultChannel.logs.push(new Log('app', 'Recent servers...'));
+    clientInfo.addLog(new Log('app', 'Recent servers...'));
     for (var i in save.servers)
     {
-      defaultChannel.logs.push(new Log('app', i));
+      clientInfo.addLog(new Log('app', i));
 
       // Force log to be an IRC link
       defaultChannel.logs[defaultChannel.logs.length - 1].isIrcLink = true;
@@ -204,13 +211,13 @@ function main()
 
 function sendMessage(message)
 {
-  clientInfo.currentChannel.logs.push(new Log(clientInfo.nick, message));
+  clientInfo.addLog(new Log(clientInfo.nick, message));
   commands.message(clientInfo.currentChannel.name, message);
 }
 
 function parseCommand(message)
 {
-  if (message[0] !== '/')
+  if (message[0] !== '/' && message[0] !== '\\')
     return false;
 
   var isCommand = true;
@@ -228,7 +235,7 @@ function parseCommand(message)
   }
 
   if (isCommand)
-    clientInfo.currentChannel.logs.push(new Log('>', message));
+    clientInfo.addLog(new Log('>', message));
 
   return isCommand;
 }
@@ -246,7 +253,7 @@ var messages = {};
 messages.registered = function()
 {
   var log = new Log('server', 'connected');
-  clientInfo.currentChannel.logs.push(log);
+  clientInfo.addLog(log);
   clientInfo.connected = true;
 
   var save = JSON.parse(localStorage['relay-save']);
@@ -260,7 +267,7 @@ messages.registered = function()
 messages.motd = function(motd)
 {
   var log = new Log('server', motd);
-  clientInfo.currentChannel.logs.push(log);
+  clientInfo.addLog(log);
 };
 
 messages.names = function(channel, nicks)
@@ -281,13 +288,13 @@ messages.message = function(from, to, text)
   var log = new Log(from + ' > ' + to, text);
   if (to === clientInfo.currentChannel.name)
     log = new Log(from, text);
-  clientInfo.currentChannel.logs.push(log);
+  clientInfo.addLog(log);
 };
 
 messages.join = function(channel, nick)
 {
   var log = new Log('server', nick + ' has joined ' + channel);
-  clientInfo.currentChannel.logs.push(log);
+  clientInfo.addLog(log);
 
   if (nick === clientInfo.nick)
   {
@@ -308,7 +315,7 @@ messages.join = function(channel, nick)
 messages.part = function(channel, nick, reason)
 {
   var log = new Log('server', nick + ' has left ' + channel + ' (' + reason + ')');
-  clientInfo.currentChannel.logs.push(log);
+  clientInfo.addLog(log);
 
   if (nick === clientInfo.nick)
   {
@@ -341,7 +348,7 @@ messages.part = function(channel, nick, reason)
 
 messages.pm = function(from, text)
 {
-  clientInfo.currentChannel.logs.push(new Log('PM ' + from, text));
+  clientInfo.addLog(new Log('PM ' + from, text));
 };
 
 messages.nick = function(oldNick, newNick, channels)
@@ -354,7 +361,7 @@ messages.nick = function(oldNick, newNick, channels)
   }
 
   var log = new Log('server', oldNick + ' is now known as ' + newNick);
-  clientInfo.currentChannel.logs.push(log);
+  clientInfo.addLog(log);
 
   if (oldNick === clientInfo.nick)
     clientInfo.nick = newNick;
@@ -379,11 +386,12 @@ commands.connect = function(server, port)
   }
   catch (e)
   {
-    clientInfo.currentChannel.logs.push(new Log('Error', JSON.stringify(e)));
+    clientInfo.addLog(new Log('Error', JSON.stringify(e)));
   }
   clientInfo.currentServer = server;
   setupListeners();
 };
+commands.server = commands.connect;
 
 commands.message = function(to, text)
 {

@@ -99,7 +99,8 @@ body
 .log-window
 {
   position: absolute;
-  width: 100%;
+  left: 0;
+  width: 75%;
   top: 40px;
   bottom: 35px;
   overflow-y: auto;
