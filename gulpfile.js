@@ -5,14 +5,23 @@
   var gulp = require("gulp");
   var concat = require("gulp-concat");
   var zip = require("gulp-zip");
+  var rimraf = require('gulp-rimraf');
 
   var appFiles =
   [
     "package.json",
     "index.html",
-    "app.js",
     "ractive.js",
     "style.css"
+  ];
+
+  var packageFiles =
+  [
+    "app/package.json",
+    "app/index.html",
+    "app/ractive.js",
+    "app/app.js",
+    "app/style.css"
   ];
 
   // Main build task
@@ -20,15 +29,22 @@
   {
     gulp.src("src/*.js")
     .pipe(concat("app.js"))
-    .pipe(gulp.dest("./"));
+    .pipe(gulp.dest("app/"));
 
     gulp.src(appFiles)
     .pipe(gulp.dest("app/"));
   });
 
+  gulp.task('clean', function()
+  {
+    var cleanFiles = packageFiles.slice();
+    gulp.src(packageFiles)
+    .pipe(rimraf());
+  });
+
   gulp.task("release", ["default"], function()
   {
-    gulp.src(appFiles)
+    gulp.src(packageFiles)
     .pipe(gulp.dest("app/package/"));
 
     gulp.src("./node_modules/irc/**/*")
