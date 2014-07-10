@@ -25,7 +25,7 @@
   ];
 
   // Main build task
-  gulp.task('default', function()
+  gulp.task('default', function(cb)
   {
     gulp.src('src/*.js')
     .pipe(concat('app.js'))
@@ -33,16 +33,20 @@
 
     gulp.src(appFiles)
     .pipe(gulp.dest('app/'));
+
+    setTimeout(function() {cb();}, 100);
   });
 
-  gulp.task('clean', function()
+  gulp.task('clean', function(cb)
   {
     var cleanFiles = packageFiles.slice();
     gulp.src(packageFiles)
     .pipe(rimraf());
+
+    setTimeout(function() {cb();}, 100);
   });
 
-  gulp.task('release', ['default'], function()
+  gulp.task('package', function(cb)
   {
     gulp.src(packageFiles)
     .pipe(gulp.dest('app/package/'));
@@ -50,14 +54,16 @@
     gulp.src('./node_modules/irc/**/*')
     .pipe(gulp.dest('app/package/node_modules/irc/'));
 
+    setTimeout(function() {cb();}, 100);
+  });
+
+  gulp.task('release', ['default', 'package'], function(cb)
+  {
     gulp.src('app/package/**/*')
     .pipe(zip('package.nw'))
-    .pipe(gulp.dest('app/'));
+    .pipe(gulp.dest('app/relay/'));
 
-    setTimeout(function()
-    {
-      gulp.start('clean');
-    }, 100);
+    setTimeout(function() {cb();}, 100);
   });
 
   // Rerun the task when a file changes

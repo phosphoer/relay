@@ -152,6 +152,18 @@ var logUI = null;
 //
 function main()
 {
+  var path = './style.css';
+  var fs = require('fs');
+
+  fs.watch(path, function()
+  {
+    if (location && location.reload)
+    {
+      require('nw.gui').Window.get().removeAllListeners('new-win-policy');
+      location.reload();
+    }
+  });
+
   // Handle opening links in a new browser
   var win = gui.Window.get();
   win.on('new-win-policy', function(frame, url, policy)

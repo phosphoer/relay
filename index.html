@@ -57,19 +57,5 @@
       </div>
     </script>
 
-    <script>
-      var path = './style.css';
-      var fs = require('fs');
-
-      fs.watch(path, function()
-      {
-        if (location && location.reload)
-        {
-          require('nw.gui').Window.get().removeAllListeners('new-win-policy');
-          location.reload();
-        }
-      });
-    </script>
-
   </body>
 </html>
