@@ -73,7 +73,8 @@ var Log = function(sender, message)
       }
       else
       {
-        commands.connect(this.ircLink);
+        var port = getSave().servers[this.ircLink];
+        commands.connect(this.ircLink, +port);
       }
     }
   };
@@ -295,7 +296,7 @@ messages.registered = function()
   var save = getSave();
   if (!save.servers)
     save.servers = {};
-  save.servers[clientInfo.currentServer] = true;
+  save.servers[clientInfo.currentServer] = clientInfo.currentPort;
 
   setSave(save);
 };
@@ -451,13 +452,17 @@ commands.connect = function(server, port)
 {
   try
   {
-    client = new irc.Client(server, clientInfo.nick);
+    client = new irc.Client(server, clientInfo.nick,
+      {
+        port: port || 6667
+      });
   }
   catch (e)
   {
     clientInfo.addLog(new Log('error', JSON.stringify(e)));
   }
   clientInfo.currentServer = server;
+  clientInfo.currentPort = port || 6667;
   setupListeners();
 };
 commands.server = commands.connect;
