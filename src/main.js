@@ -125,7 +125,6 @@ var defaultChannel = new Channel('default');
 var clientInfo =
 {
   nick: getSave().nick || 'relay-user',
-  userName: 'unnamed-user',
   channels: [defaultChannel],
   currentChannel: defaultChannel,
 
@@ -289,6 +288,11 @@ function setupListeners()
 var messages = {};
 messages.registered = function()
 {
+  while (clientInfo.channels.length > 1)
+    clientInfo.channels.pop();
+  clientInfo.currentChannel = defaultChannel;
+  channelsUI.update();
+
   var log = new Log('server', 'connected');
   clientInfo.addLog(log);
   clientInfo.connected = true;
@@ -471,6 +475,12 @@ commands.disconnect = function(message)
 {
   client.disconnect(message, function()
   {
+    while (clientInfo.channels.length > 1)
+      clientInfo.channels.pop();
+    clientInfo.currentChannel = defaultChannel;
+    channelsUI.update();
+    logUI.update();
+    usersUI.update();
     clientInfo.addLog(new Log('app', 'disconnected'));
   });
 };
