@@ -408,7 +408,7 @@ messages.nick = function(oldNick, newNick, channels)
     clientInfo.nick = newNick;
 
     var save = getSave();
-    save.nick = nick;
+    save.nick = clientInfo.nick;
     setSave(save);
   }
 
