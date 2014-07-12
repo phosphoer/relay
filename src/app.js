@@ -104,7 +104,7 @@ App.prototype.initialize = function()
   {
     if (e.keyCode === 38)
     {
-      var cmd = 
+      
     }
   });
 };

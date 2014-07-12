@@ -1,5 +1,5 @@
-var gui = require('nw.gui');
-var App = require('./app.js');
+var gui = window.require('nw.gui');
+var App = window.require('./app.js');
 
 function main()
 {
