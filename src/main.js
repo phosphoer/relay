@@ -184,7 +184,7 @@ function main()
     clientInfo.addLog('app', 'Recent servers...');
     for (var i in save.servers)
     {
-      clientInfo.addLog('app', i);
+      clientInfo.addLog('app', i + ':' + save.servers[i]);
 
       // Force log to be an IRC link
       clientInfo.channels[0].logs[clientInfo.channels[0].logs.length - 1].isIrcLink = true;

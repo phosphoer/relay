@@ -128,6 +128,16 @@ body
   color: #888;
 }
 
+.log-item[data-from='app'] .log-item-from
+{
+  color: #5d5;
+}
+
+.log-item[data-from='server'] .log-item-from
+{
+  color: #55d;
+}
+
 .log-item-from:after
 {
   content: ' ';
