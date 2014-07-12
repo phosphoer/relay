@@ -36,7 +36,9 @@ module.exports = function(appModel)
 
   commands.message = function(to, text)
   {
-    appModel.client.say(to, text);
+    var messageParts = Array.prototype.slice.call(arguments, 1);
+    var message = messageParts.join(' ');
+    appModel.client.say(to, message);
   };
 
   commands.join = function(channel)
