@@ -1,7 +1,10 @@
 var Channel = require('./channel');
 var Log = require('./log');
+var packageJSON = require('./package.json');
 var irc = require('irc');
 var imgur = require('imgur');
+var GithubAPI = require('github');
+var fs = require('fs');
 
 var App = function(Ractive)
 {
@@ -10,7 +13,7 @@ var App = function(Ractive)
   this.defaultChannel = this.channels[0];
   this.currentChannel = this.defaultChannel;
   this.client = new irc.Client('', 'unnamed-user');
-  imgur.setKey('8fe3c8f3a95d595');
+  this.github = new GithubAPI({version: "3.0.0"});
   this.connected = false;
   this.channelsUI = null;
   this.usersUI = null;
@@ -24,6 +27,8 @@ var App = function(Ractive)
 
 App.prototype.initialize = function()
 {
+  imgur.setKey('8fe3c8f3a95d595');
+
   var that = this;
   // Build channels window
   this.channelsUI = new this.Ractive(
@@ -86,6 +91,63 @@ App.prototype.initialize = function()
       this.channels[0].logs[this.channels[0].logs.length - 1].isIrcLink = true;
       this.channels[0].logs[this.channels[0].logs.length - 1].ircLink = i;
     }
+  }
+
+  // Get app directory
+  var path = require('path');
+  var appPath = path.dirname(process.execPath);
+  if (appPath.indexOf('Frameworks/node-webkit Helper.app/Contents/MacOS') > 0)
+  {
+    appPath = path.resolve(appPath, '..', '..', '..', '..', '..', '..');
+  }
+
+  var downloadUpdate = function(url, callback)
+  {
+    var http = require('https');
+    var file = fs.createWriteStream(appPath + '/package_new.nw');
+    var request = http.get(url, function(response)
+    {
+      response.pipe(file);
+      file.on('finish', function()
+      {
+        file.close(callback);
+      });
+    });
+  };
+
+  // Check for updates
+  if (fs.exists(appPath + '/package.nw'))
+  {
+    var repo = this.github.releases.listReleases({owner: 'phosphoer', repo: 'relay'}, function(error, releases)
+    {
+      console.log('checking for updates');
+      for (var i = 0; i < releases.length; ++i)
+      {
+        // Find a release with a higher version number
+        var version = parseFloat(releases[i].tag_name.replace('v', ''));
+        if (version > parseFloat(packageJSON.version))
+        {
+          console.log('found newer release');
+          // Find the package asset
+          for (var j = 0; j < releases[i].assets.length; ++j)
+          {
+            var asset = releases[i].assets[j];
+            if (asset.name === 'package.nw')
+            {
+              downloadUpdate(asset.browser_download_url, function()
+              {
+                console.log('download complete');
+                if (fs.exists(appPath + '/package.nw'))
+                  fs.unlink(appPath + '/package.nw');
+                fs.rename(appPath + '/package_new.nw', appPath + '/package.nw');
+                that.addLog('app', 'update downloaded, restart to apply');
+              });
+              break;
+            }
+          }
+        }
+      }
+    });
   }
 
   // Handle enter press on input

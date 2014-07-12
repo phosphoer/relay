@@ -65,6 +65,9 @@
     gulp.src('./node_modules/imgur/**/*')
     .pipe(gulp.dest('app/package/node_modules/imgur/'));
 
+    gulp.src('./node_modules/github/**/*')
+    .pipe(gulp.dest('app/package/node_modules/github/'));
+
     setTimeout(function() {cb();}, 100);
   });
 
