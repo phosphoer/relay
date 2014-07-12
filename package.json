@@ -6,7 +6,7 @@
   },
   "window": {
     "title": "Relay",
-    "toolbar": true
+    "toolbar": false
   },
   "devDependencies": {
     "gulp": "^3.8.5",
