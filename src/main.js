@@ -21,6 +21,7 @@ var Channel = function(name)
   {
     clientInfo.currentChannel = this;
     logUI.update();
+    usersUI.update();
   };
 
   this.clear = function()
@@ -271,10 +272,17 @@ messages.names = function(channel, nicks)
 
 messages.message = function(from, to, text)
 {
-  var log = new Log(from + ' > ' + to, text);
-  if (to === clientInfo.currentChannel.name)
-    log = new Log(from, text);
-  clientInfo.addLog(log);
+  // Get the channel this was to
+  var chan = clientInfo.getChannel(to);
+  if (chan)
+  {
+    chan.addLog(new Log(from, text));
+  }
+  // If no channel, it may have been a pm to us
+  else if (to === clientInfo.nick)
+  {
+    clientInfo.addLog(new Log('private ' + from, text));
+  }
 };
 
 messages.join = function(channel, nick)
