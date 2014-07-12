@@ -9,9 +9,12 @@ module.exports = function(appModel)
   {
     try
     {
+      appModel.addLog('app', "connecting...");
+
       appModel.client = new irc.Client(server, appModel.nick,
       {
-        port: port || 6667
+        port: port || 6667,
+        userName: 'relay'
       });
 
       appModel.setupListeners();
@@ -72,7 +75,7 @@ module.exports = function(appModel)
     } 
     else
     {
-      appModel.addLog('app', 'Nick: ' + appModel.nick);
+      appModel.addLog('app', 'nick: ' + appModel.nick);
     }
   };
 

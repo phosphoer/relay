@@ -28,8 +28,13 @@ module.exports = function(appModel)
 
     chan.users = [];
     for (var nick in nicks)
-      chan.users.push(new User(nick));
+      chan.users.push(new User(appModel, nick));
     appModel.usersUI.update();
+  };
+
+  events.motd = function(motd)
+  {
+    appModel.addLog('server', motd);
   };
 
   events.message = function(from, to, text)
@@ -61,7 +66,7 @@ module.exports = function(appModel)
     else
     {
       var chan = appModel.getChannel(channel);
-      chan.users.push(new User(nick));
+      chan.users.push(new User(appModel, nick));
     }
 
     appModel.usersUI.update();
@@ -145,15 +150,7 @@ module.exports = function(appModel)
   {
     console.log(message);
 
-    if (message.command === 'rpl_motdstart')
-    {
-      appModel.addLog('server', message.args[1]);
-    }
-    else if (message.command === 'rpl_motd')
-    {
-      appModel.addLog('server', message.args[1]);
-    }
-    else if (message.command === 'err_nicknameinuse')
+    if (message.command === 'err_nicknameinuse')
     {
       appModel.addLog('error', 'That nickname is already in use, please choose another');
     }

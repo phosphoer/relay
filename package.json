@@ -13,6 +13,7 @@
     "gulp-concat": "^2.2.0",
     "gulp-rimraf": "^0.1.0",
     "gulp-zip": "^0.4.0",
+    "imgur": "0.0.3",
     "irc": "^0.3.7",
     "underscore": "^1.6.0"
   }

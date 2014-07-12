@@ -34,7 +34,7 @@
     <script id='usersTemplate' type='text/ractive'>
       <div class='users-window'>
         {{#user.currentChannel.users}}
-          <div class='users-item'>
+          <div class='users-item' on-click='activate'>
             <span class='users-item-name'>{{name}}</span>
           </div>
         {{/user.currentChannel.users}}

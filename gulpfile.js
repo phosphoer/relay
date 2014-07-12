@@ -62,6 +62,9 @@
     gulp.src('./node_modules/underscore/**/*')
     .pipe(gulp.dest('app/package/node_modules/underscore/'));
 
+    gulp.src('./node_modules/imgur/**/*')
+    .pipe(gulp.dest('app/package/node_modules/imgur/'));
+
     setTimeout(function() {cb();}, 100);
   });
 

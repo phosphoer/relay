@@ -1,6 +1,7 @@
 var Channel = require('./channel');
 var Log = require('./log');
 var irc = require('irc');
+var imgur = require('imgur');
 
 var App = function(Ractive)
 {
@@ -9,6 +10,7 @@ var App = function(Ractive)
   this.defaultChannel = this.channels[0];
   this.currentChannel = this.defaultChannel;
   this.client = new irc.Client('', 'unnamed-user');
+  imgur.setKey('8fe3c8f3a95d595');
   this.connected = false;
   this.channelsUI = null;
   this.usersUI = null;
@@ -47,6 +49,10 @@ App.prototype.initialize = function()
     {
       user: this
     }
+  });
+  this.usersUI.on('activate', function(e)
+  {
+    e.context.activate();
   });
 
   // Build log window
@@ -123,6 +129,27 @@ App.prototype.initialize = function()
         input.value = cmd;
     }
   });
+
+  // Handle file drop
+  window.ondragover = function(e) { e.preventDefault(); return false };
+  window.ondrop = function(e)
+  {
+    e.preventDefault();
+
+    // for (var i = 0; i < e.dataTransfer.files.length; ++i)
+    // {
+    //   var path = e.dataTransfer.files[i].path;
+    //   if (path.match(/(.png|.gif|.jpg|.jpeg)$/))
+    //   {
+    //     imgur.upload(path, function(response)
+    //     {
+    //       console.log(response);
+    //     });
+    //   }
+    // }
+
+    return false;
+  };
 };
 
 App.prototype.sendMessage = function(message)
@@ -142,6 +169,7 @@ App.prototype.parseCommand = function(message)
 
   if (command in this.commands)
   {
+    this.addLog('>', message);
     this.commands[command].apply(this.commands, args);
   }
   else
