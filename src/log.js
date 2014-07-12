@@ -1,4 +1,4 @@
-module.exports = function(sender, message)
+module.exports = function(appModel, sender, message)
 {
   this.sender = sender || 'no one';
   this.message = message || 'nooothinnnggg';
@@ -52,19 +52,19 @@ module.exports = function(sender, message)
     }
 
     // Handle clicking a suggested IRC server link
-    if (!clientInfo.connected && this.isIrcLink)
+    if (!appModel.connected && this.isIrcLink)
     {
       if (e.original.button === 2)
       {
         var save = getSave();
         delete save.servers[this.message];
         setSave(save);
-        clientInfo.currentChannel.logs.splice(clientInfo.currentChannel.logs.indexOf(this), 1);
+        appModel.currentChannel.logs.splice(appModel.currentChannel.logs.indexOf(this), 1);
       }
       else
       {
-        var port = getSave().servers[this.ircLink];
-        commands.connect(this.ircLink, +port);
+        var port = appModel.getSave().servers[this.ircLink];
+        appModel.commands.connect(this.ircLink, +port);
       }
     }
   };

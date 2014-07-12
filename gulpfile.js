@@ -21,6 +21,12 @@
     'app/index.html',
     'app/ractive.js',
     'app/app.js',
+    'app/channel.js',
+    'app/user.js',
+    'app/events.js',
+    'app/commands.js',
+    'app/log.js',
+    'app/main.js',
     'app/style.css'
   ];
 
@@ -52,6 +58,9 @@
 
     gulp.src('./node_modules/irc/**/*')
     .pipe(gulp.dest('app/package/node_modules/irc/'));
+
+    gulp.src('./node_modules/underscore/**/*')
+    .pipe(gulp.dest('app/package/node_modules/underscore/'));
 
     setTimeout(function() {cb();}, 100);
   });
