@@ -9,8 +9,8 @@ module.exports = function(sender, message)
   this.ircLink = '';
   this.isIrcLink = false;
   this.type = '';
-  this.from = '';
-  
+  this.from = sender;
+
   // Detect a message with a link
   var match = message.match(/((http:.+)|(https:.+))/);
   if (match && match.index >= 0)
