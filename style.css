@@ -89,6 +89,11 @@ body
   padding: 5px;
   margin-right: 10px;
   color: #ddd;
+  background: #555;
+}
+
+.channel-item[data-active='false']
+{
   background: #5a5;
 }
 

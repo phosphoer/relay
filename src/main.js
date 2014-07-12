@@ -16,6 +16,7 @@ var Channel = function(name)
   this.name = name || 'channel';
   this.logs = [];
   this.users = [];
+  this.active = false;
 
   this.activate = function()
   {

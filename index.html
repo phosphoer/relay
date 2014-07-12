@@ -23,7 +23,7 @@
     <script id='channelsTemplate' type='text/ractive'>
       <div class='channel-window'>
         {{#user.channels}}
-          <div class='channel-item' on-click='activate'>
+          <div class='channel-item' data-active='{{active}}' on-click='activate'>
             <span class='channel-item-name'>{{name}}</span>
           </div>
         {{/user.channels}}
