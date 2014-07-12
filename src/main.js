@@ -84,11 +84,11 @@ var clientInfo = {
         return this.channels[i];
   },
 
-  addLog: function(log)
+  addLog: function(sender, message)
   {
-    this.currentChannel.logs.push(log);
+    this.currentChannel.logs.push(new Log(sender, message));
     var logWin = document.querySelector('.log-window');
-    logWin.scrollTop = logWin.scrollHeight;
+    logWin.scrollTop = logWin.scrollHeight;    
   }
 };
 
@@ -175,16 +175,16 @@ function main()
   });
 
   // Default message
-  clientInfo.addLog(new Log('app', 'Welcome to Relay!'));
+  clientInfo.addLog('app', 'Welcome to Relay!');
 
   // Show recent servers
   var save = getSave();
   if (save.servers)
   {
-    clientInfo.addLog(new Log('app', 'Recent servers...'));
+    clientInfo.addLog('app', 'Recent servers...');
     for (var i in save.servers)
     {
-      clientInfo.addLog(new Log('app', i));
+      clientInfo.addLog('app', i);
 
       // Force log to be an IRC link
       clientInfo.channels[0].logs[clientInfo.channels[0].logs.length - 1].isIrcLink = true;
@@ -211,7 +211,7 @@ function main()
 
 function sendMessage(message)
 {
-  clientInfo.addLog(new Log(clientInfo.nick, message));
+  clientInfo.addLog(clientInfo.nick, message);
   commands.message(clientInfo.currentChannel.name, message);
 }
 
@@ -230,7 +230,7 @@ function parseCommand(message)
   }
   else
   {
-    clientInfo.addLog(new Log('x', message));
+    clientInfo.addLog('x', message);
   }
 
   return true;
@@ -245,8 +245,7 @@ messages.registered = function()
 {
   clientInfo.resetChannels();
 
-  var log = new Log('server', 'connected');
-  clientInfo.addLog(log);
+  clientInfo.addLog('server', 'connected');
   clientInfo.connected = true;
 
   var save = getSave();
@@ -276,19 +275,18 @@ messages.message = function(from, to, text)
   var chan = clientInfo.getChannel(to);
   if (chan)
   {
-    chan.addLog(new Log(from, text));
+    chan.addLog(from, text);
   }
   // If no channel, it may have been a pm to us
   else if (to === clientInfo.nick)
   {
-    clientInfo.addLog(new Log('private ' + from, text));
+    clientInfo.addLog('private ' + from, text);
   }
 };
 
 messages.join = function(channel, nick)
 {
-  var log = new Log('server', nick + ' has joined ' + channel);
-  clientInfo.addLog(log);
+  clientInfo.addLog('server', nick + ' has joined ' + channel);
 
   if (nick === clientInfo.nick)
   {
@@ -308,8 +306,7 @@ messages.join = function(channel, nick)
 
 messages.part = function(channel, nick, reason)
 {
-  var log = new Log('server', nick + ' has left ' + channel + ' (' + reason + ')');
-  clientInfo.addLog(log);
+  clientInfo.addLog('server', nick + ' has left ' + channel + ' (' + reason + ')');
 
   if (nick === clientInfo.nick)
   {
@@ -353,8 +350,7 @@ messages.nick = function(oldNick, newNick, channels)
     }
   }
 
-  var log = new Log('server', oldNick + ' is now known as ' + newNick);
-  clientInfo.addLog(log);
+  clientInfo.addLog('server', oldNick + ' is now known as ' + newNick);
 
   if (oldNick === clientInfo.nick)
   {
@@ -388,19 +384,19 @@ messages.raw = function(message)
 
   if (message.command === 'rpl_motdstart')
   {
-    clientInfo.addLog(new Log('server', message.args[1]));
+    clientInfo.addLog('server', message.args[1]);
   }
   else if (message.command === 'rpl_motd')
   {
-    clientInfo.addLog(new Log('server', message.args[1]));
+    clientInfo.addLog('server', message.args[1]);
   }
   else if (message.command === 'err_nicknameinuse')
   {
-    clientInfo.addLog(new Log('error', 'That nickname is already in use, please choose another'));
+    clientInfo.addLog('error', 'That nickname is already in use, please choose another');
   }
   else if (message.command === 'err_erroneusnickname')
   {
-    clientInfo.addLog(new Log('error', 'That nickname is invalid, please choose another'));
+    clientInfo.addLog('error', 'That nickname is invalid, please choose another');
   }
 };
 

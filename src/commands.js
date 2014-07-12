@@ -31,7 +31,7 @@ module.exports = function(clientInfo, logUI, usersUI, channelsUI)
     }
     catch (e)
     {
-      clientInfo.addLog(new Log('error', e.toString()));
+      clientInfo.addLog('error', e.toString());
     }
     clientInfo.currentServer = server;
     clientInfo.currentPort = port || 6667;
@@ -44,7 +44,7 @@ module.exports = function(clientInfo, logUI, usersUI, channelsUI)
       clientInfo.resetChannels();
       logUI.update();
       usersUI.update();
-      clientInfo.addLog(new Log('app', 'disconnected'));
+      clientInfo.addLog('app', 'disconnected');
     });
   };
 
@@ -76,7 +76,7 @@ module.exports = function(clientInfo, logUI, usersUI, channelsUI)
       if (clientInfo.currentChannel === clientInfo.channels[0])
       {
         clientInfo.nick = nick;
-        clientInfo.addLog(new Log('app', 'Set nick to ' + nick));
+        clientInfo.addLog('app', 'Set nick to ' + nick);
         var save = getSave();
         save.nick = nick;
         setSave(save);
@@ -84,7 +84,7 @@ module.exports = function(clientInfo, logUI, usersUI, channelsUI)
     } 
     else
     {
-      clientInfo.addLog(new Log('app', 'Nick: ' + clientInfo.nick));
+      clientInfo.addLog('app', 'Nick: ' + clientInfo.nick);
     }
   };
 
@@ -95,8 +95,8 @@ module.exports = function(clientInfo, logUI, usersUI, channelsUI)
 
   commands.help = function()
   {
-    clientInfo.addLog(new Log('app', 'Commands'))
-    clientInfo.addLog(new Log('app', _.keys(commands).join(', ')));
+    clientInfo.addLog('app', 'Commands');
+    clientInfo.addLog('app', _.keys(commands).join(', '));
   }
 
   return commands;
