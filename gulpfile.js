@@ -28,7 +28,6 @@
   gulp.task('default', function(cb)
   {
     gulp.src('src/*.js')
-    .pipe(concat('app.js'))
     .pipe(gulp.dest('app/'));
 
     gulp.src(appFiles)

@@ -2,6 +2,8 @@ var irc = require('irc');
 var gui = require('nw.gui');
 var client = new irc.Client('', 'unnamed-user');
 
+var Log = require('./log.js');
+
 //
 // Some classes
 //
@@ -10,75 +12,6 @@ var User = function(name)
   this.name = name;
 };
 
-var Log = function(sender, message)
-{
-  this.sender = sender || 'no one';
-  this.message = message || 'nooothinnnggg';
-  this.imgSrc = '';
-  this.imgDisplay = 'none';
-  this.linkHref = '';
-  this.linkDisplay = 'none';
-  this.ircLink = '';
-  this.isIrcLink = false;
-
-  // Detect a message with a link
-  var match = message.match(/((http:.+)|(https:.+))/);
-  if (match && match.index >= 0)
-  {
-    var url = match[1];
-
-    if (/(.png|.gif|.jpg|.jpeg)$/.test(url))
-    {
-      this.imgSrc = url;
-      this.linkHref = url;
-      this.imgDisplay = '';
-      this.message = this.message.replace(url, '');
-    }
-    else
-    {
-      this.linkHref = url;
-      this.linkDisplay = '';
-      this.message = this.message.replace(url, '');
-    }
-  }
-
-  // Detect a message with an irc server link
-  match = message.match(/(irc.+)/);
-  if (match && match.index >= 0)
-  {
-    var url = match[1];
-    this.ircLink = url;
-    this.isIrcLink = true;
-  }
-
-  this.activate = function(e)
-  {
-    // Handle right clicking an image to hide it
-    if (e.original.button === 2 && this.imgSrc)
-    {
-      this.imgDisplay = 'none';
-      this.linkDisplay = '';
-      logUI.update();
-    }
-
-    // Handle clicking a suggested IRC server link
-    if (!clientInfo.connected && this.isIrcLink)
-    {
-      if (e.original.button === 2)
-      {
-        var save = getSave();
-        delete save.servers[this.message];
-        setSave(save);
-        clientInfo.currentChannel.logs.splice(clientInfo.currentChannel.logs.indexOf(this), 1);
-      }
-      else
-      {
-        var port = getSave().servers[this.ircLink];
-        commands.connect(this.ircLink, +port);
-      }
-    }
-  };
-};
 
 var Channel = function(name)
 {
@@ -115,13 +48,10 @@ function setSave(save)
   localStorage['relay-save'] = JSON.stringify(save);
 }
 
-
-// The default 'channel'
-var defaultChannel = new Channel('default');
-
 //
 // Main app model
 //
+var defaultChannel = new Channel('default');
 var clientInfo =
 {
   nick: getSave().nick || 'relay-user',
@@ -146,6 +76,8 @@ var clientInfo =
 var channelsUI = null;
 var usersUI = null;
 var logUI = null;
+
+var commands = require('./commands')(client, clientInfo, logUI, usersUI, channelsUI);
 
 //
 // Woo main!
@@ -227,8 +159,8 @@ function main()
       clientInfo.addLog(new Log('app', i));
 
       // Force log to be an IRC link
-      defaultChannel.logs[defaultChannel.logs.length - 1].isIrcLink = true;
-      defaultChannel.logs[defaultChannel.logs.length - 1].ircLink = i;
+      clientInfo.channels[0].logs[clientInfo.channels[0].logs.length - 1].isIrcLink = true;
+      clientInfo.channels[0].logs[clientInfo.channels[0].logs.length - 1].ircLink = i;
     }
   }
 
@@ -288,9 +220,8 @@ function setupListeners()
 var messages = {};
 messages.registered = function()
 {
-  while (clientInfo.channels.length > 1)
-    clientInfo.channels.pop();
-  clientInfo.currentChannel = defaultChannel;
+  clientInfo.channels.slice(0, 1); // remove all but default channel
+  clientInfo.currentChannel = clientInfo.channels[0];
   channelsUI.update();
 
   var log = new Log('server', 'connected');
@@ -448,83 +379,3 @@ messages.error = function(message)
   console.log('error: ' + JSON.stringify(message));
 };
 
-//
-// Commands
-//
-var commands = {};
-commands.connect = function(server, port)
-{
-  try
-  {
-    client = new irc.Client(server, clientInfo.nick,
-      {
-        port: port || 6667
-      });
-  }
-  catch (e)
-  {
-    clientInfo.addLog(new Log('error', JSON.stringify(e)));
-  }
-  clientInfo.currentServer = server;
-  clientInfo.currentPort = port || 6667;
-  setupListeners();
-};
-commands.server = commands.connect;
-
-commands.disconnect = function(message)
-{
-  client.disconnect(message, function()
-  {
-    while (clientInfo.channels.length > 1)
-      clientInfo.channels.pop();
-    clientInfo.currentChannel = defaultChannel;
-    channelsUI.update();
-    logUI.update();
-    usersUI.update();
-    clientInfo.addLog(new Log('app', 'disconnected'));
-  });
-};
-commands.dc = commands.disconnect;
-commands.quit = commands.disconnect;
-
-commands.message = function(to, text)
-{
-  client.say(to, text);
-};
-commands.msg = commands.message;
-commands.pm = commands.message;
-
-commands.join = function(channel)
-{
-  client.join(channel);
-};
-
-commands.part = function(channel, message)
-{
-  if (!channel)
-    client.part(clientInfo.currentChannel.name, message);
-  else
-    client.part(channel, message);
-};
-
-commands.nick = function(nick)
-{
-  client.send('NICK', nick);
-
-  // We can change our nick with no confirmation in default channel
-  if (clientInfo.currentChannel === defaultChannel)
-  {
-    clientInfo.nick = nick;
-    clientInfo.addLog(new Log('app', 'Set nick to ' + nick));
-    var save = getSave();
-    save.nick = nick;
-    setSave(save);
-  }
-};
-
-commands.clear = function()
-{
-  clientInfo.currentChannel.logs = [];
-  logUI.update();
-};
-commands.cls = commands.clear;
