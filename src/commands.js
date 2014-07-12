@@ -1,6 +1,8 @@
-module.exports = function(client, clientInfo, logUI, usersUI, channelsUI)
+module.exports = function(clientInfo, logUI, usersUI, channelsUI)
 {
+  var irc = require('irc');  
   var Log = require('./log.js');
+  var _ = require('underscore');
 
   function getSave()
   {
@@ -20,61 +22,55 @@ module.exports = function(client, clientInfo, logUI, usersUI, channelsUI)
   {
     try
     {
-      client = new irc.Client(server, clientInfo.nick,
+      clientInfo.client = new irc.Client(server, clientInfo.nick,
       {
         port: port || 6667
       });
+
+      clientInfo.setupListeners();
     }
     catch (e)
     {
-      clientInfo.addLog(new Log('error', JSON.stringify(e)));
+      clientInfo.addLog(new Log('error', e.toString()));
     }
     clientInfo.currentServer = server;
     clientInfo.currentPort = port || 6667;
   };
-  commands.server = commands.connect;
 
   commands.disconnect = function(message)
   {
-    client.disconnect(message, function()
+    clientInfo.client.disconnect(message, function()
     {
-      while (clientInfo.channels.length > 1)
-        clientInfo.channels.pop();
-      clientInfo.currentChannel = defaultChannel;
-      channelsUI.update();
+      clientInfo.resetChannels();
       logUI.update();
       usersUI.update();
       clientInfo.addLog(new Log('app', 'disconnected'));
     });
   };
-  commands.dc = commands.disconnect;
-  commands.quit = commands.disconnect;
 
   commands.message = function(to, text)
   {
-    client.say(to, text);
+    clientInfo.client.say(to, text);
   };
-  commands.msg = commands.message;
-  commands.pm = commands.message;
 
   commands.join = function(channel)
   {
-    client.join(channel);
+    clientInfo.client.join(channel);
   };
 
   commands.part = function(channel, message)
   {
     if (!channel)
-      client.part(clientInfo.currentChannel.name, message);
+      clientInfo.client.part(clientInfo.currentChannel.name, message);
     else
-      client.part(channel, message);
+      clientInfo.client.part(channel, message);
   };
 
   commands.nick = function(nick)
   {
     if (nick)
     {
-      client.send('NICK', nick);
+      clientInfo.client.send('NICK', nick);
 
       // We can change our nick with no confirmation in default channel
       if (clientInfo.currentChannel === clientInfo.channels[0])
@@ -85,19 +81,23 @@ module.exports = function(client, clientInfo, logUI, usersUI, channelsUI)
         save.nick = nick;
         setSave(save);
       }
-    }
+    } 
     else
     {
-      clientInfo.addLog(new Log('app', clientInfo.nick));
+      clientInfo.addLog(new Log('app', 'Nick: ' + clientInfo.nick));
     }
   };
 
   commands.clear = function()
   {
-    clientInfo.currentChannel.logs = [];
-    logUI.update();
+    clientInfo.currentChannel.clear();
   };
-  commands.cls = commands.clear;
+
+  commands.help = function()
+  {
+    clientInfo.addLog(new Log('app', 'Commands'))
+    clientInfo.addLog(new Log('app', _.keys(commands).join(', ')));
+  }
 
   return commands;
 }

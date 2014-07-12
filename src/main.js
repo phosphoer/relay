@@ -1,7 +1,5 @@
 var irc = require('irc');
 var gui = require('nw.gui');
-var client = new irc.Client('', 'unnamed-user');
-
 var Log = require('./log.js');
 
 //
@@ -25,6 +23,12 @@ var Channel = function(name)
     logUI.update();
   };
 
+  this.clear = function()
+  {
+    clientInfo.currentChannel.logs = [];
+    logUI.update();
+  }
+
   this.getUser = function(name)
   {
     for (var i = 0; i < this.users.length; ++i)
@@ -39,7 +43,8 @@ var Channel = function(name)
 function getSave()
 {
   if (!localStorage['relay-save'])
-    localStorage['relay-save'] = JSON.stringify({});
+    localStorage['relay-save'] = JSON.stringify(
+    {});
   return JSON.parse(localStorage['relay-save']);
 }
 
@@ -52,11 +57,24 @@ function setSave(save)
 // Main app model
 //
 var defaultChannel = new Channel('default');
-var clientInfo =
-{
+var clientInfo = {
   nick: getSave().nick || 'relay-user',
   channels: [defaultChannel],
   currentChannel: defaultChannel,
+  client: new irc.Client('', 'unnamed-user'),
+
+  setupListeners: function()
+  {
+    for (var i in messages)
+      clientInfo.client.addListener(i, messages[i]);
+  },
+
+  resetChannels: function()
+  {
+    channels = [defaultChannel];
+    currentChannel = channels[0];
+    channelsUI.update();
+  },
 
   getChannel: function(name)
   {
@@ -77,7 +95,7 @@ var channelsUI = null;
 var usersUI = null;
 var logUI = null;
 
-var commands = require('./commands')(client, clientInfo, logUI, usersUI, channelsUI);
+var commands = require('./commands')(clientInfo, logUI, usersUI, channelsUI);
 
 //
 // Woo main!
@@ -110,7 +128,7 @@ function main()
   // Handle closing the window
   win.on('close', function()
   {
-    client.disconnect('quit');
+    clientInfo.client.disconnect('quit');
     this.close(true);
   });
 
@@ -119,7 +137,10 @@ function main()
   {
     el: 'channelContainer',
     template: '#channelsTemplate',
-    data: {user: clientInfo}
+    data:
+    {
+      user: clientInfo
+    }
   });
   channelsUI.on('activate', function(e)
   {
@@ -131,7 +152,10 @@ function main()
   {
     el: 'usersContainer',
     template: '#usersTemplate',
-    data: {user: clientInfo}
+    data:
+    {
+      user: clientInfo
+    }
   });
 
   // Build log window
@@ -139,7 +163,10 @@ function main()
   {
     el: 'logContainer',
     template: '#logTemplate',
-    data: {user: clientInfo}
+    data:
+    {
+      user: clientInfo
+    }
   });
   logUI.on('activate', function(e)
   {
@@ -208,11 +235,6 @@ function parseCommand(message)
   return true;
 }
 
-function setupListeners()
-{
-  for (var i in messages)
-    client.addListener(i, messages[i]);
-}
 
 //
 // Messages
@@ -220,9 +242,7 @@ function setupListeners()
 var messages = {};
 messages.registered = function()
 {
-  clientInfo.channels.slice(0, 1); // remove all but default channel
-  clientInfo.currentChannel = clientInfo.channels[0];
-  channelsUI.update();
+  clientInfo.resetChannels();
 
   var log = new Log('server', 'connected');
   clientInfo.addLog(log);
@@ -380,4 +400,3 @@ messages.error = function(message)
 {
   console.log('error: ' + JSON.stringify(message));
 };
-
