@@ -305,12 +305,6 @@ messages.registered = function()
   setSave(save);
 };
 
-messages.motd = function(motd)
-{
-  var log = new Log('server', motd);
-  clientInfo.addLog(log);
-};
-
 messages.names = function(channel, nicks)
 {
   var chan = clientInfo.getChannel(channel);
@@ -433,7 +427,15 @@ messages.raw = function(message)
 {
   console.log(message);
 
-  if (message.command === 'err_nicknameinuse')
+  if (message.command === 'rpl_motdstart')
+  {
+    clientInfo.addLog(new Log('server', message.args[1]));
+  }
+  else if (message.command === 'rpl_motd')
+  {
+    clientInfo.addLog(new Log('server', message.args[1]));
+  }
+  else if (message.command === 'err_nicknameinuse')
   {
     clientInfo.addLog(new Log('error', 'That nickname is already in use, please choose another'));
   }
