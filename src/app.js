@@ -96,6 +96,8 @@ App.prototype.initialize = function()
       // message
       if (!that.parseCommand(command))
         that.sendMessage(command);
+
+      that.commandHistory.push(command);
     }
   });
 
@@ -104,7 +106,21 @@ App.prototype.initialize = function()
   {
     if (e.keyCode === 38)
     {
-      
+      ++that.currentHistoryIndex;
+      if (that.currentHistoryIndex >= that.commandHistory.length)
+        that.currentHistoryIndex = that.commandHistory.length - 1;
+      var cmd = that.commandHistory[(that.commandHistory.length - that.currentHistoryIndex) - 1];
+      if (cmd)
+        input.value = cmd;
+    }
+    if (e.keyCode === 40)
+    {
+      --that.currentHistoryIndex;
+      if (that.currentHistoryIndex < 0)
+        that.currentHistoryIndex = 0;
+      var cmd = that.commandHistory[(that.commandHistory.length - that.currentHistoryIndex) - 1];
+      if (cmd)
+        input.value = cmd;
     }
   });
 };
