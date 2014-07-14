@@ -107,10 +107,21 @@ App.prototype.initialize = function()
     var file = fs.createWriteStream(appPath + '/package_new.nw');
     var request = http.get(url, function(response)
     {
-      response.pipe(file);
-      file.on('finish', function()
+      if (response.statusCode === 302)
       {
-        file.close(callback);
+        console.log('download redirecting');
+        downloadUpdate(response.headers.location, callback);
+        return;
+      }
+
+      response.on('data', function(data)
+      {
+        file.write(data);
+      });
+      response.on('end', function()
+      {
+        file.end();
+        callback();
       });
     });
   };
