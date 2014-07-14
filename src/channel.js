@@ -10,6 +10,11 @@ module.exports = function(name, appModel)
   this.addLog = function(sender, message)
   {
     this.logs.push(new Log(appModel, sender, message));
+    if (appModel.currentChannel === this)
+    {
+      var logWin = window.document.querySelector('.log-window');
+      logWin.scrollTop = logWin.scrollHeight;
+    }
   };
 
   this.activate = function()
