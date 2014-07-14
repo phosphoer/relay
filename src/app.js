@@ -116,7 +116,7 @@ App.prototype.initialize = function()
   };
 
   // Check for updates
-  if (fs.exists(appPath + '/package.nw'))
+  if (fs.existsSync(appPath + '/package.nw'))
   {
     var repo = this.github.releases.listReleases({owner: 'phosphoer', repo: 'relay'}, function(error, releases)
     {
@@ -137,9 +137,9 @@ App.prototype.initialize = function()
               downloadUpdate(asset.browser_download_url, function()
               {
                 console.log('download complete');
-                if (fs.exists(appPath + '/package.nw'))
-                  fs.unlink(appPath + '/package.nw');
-                fs.rename(appPath + '/package_new.nw', appPath + '/package.nw');
+                if (fs.existsSync(appPath + '/package.nw'))
+                  fs.unlinkSync(appPath + '/package.nw');
+                fs.renameSync(appPath + '/package_new.nw', appPath + '/package.nw');
                 that.addLog('app', 'update downloaded, restart to apply');
               });
               break;
