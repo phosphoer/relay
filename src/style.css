@@ -92,7 +92,7 @@ body
   background: #555;
 }
 
-.channel-item[data-active='false']
+.channel-item[data-active='true']
 {
   background: #5a5;
 }
