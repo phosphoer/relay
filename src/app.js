@@ -22,6 +22,7 @@ var App = function(Ractive)
   this.events = require('./events')(this);
   this.commandHistory = [];
   this.currentHistoryIndex = 0;
+  this.lastPMFrom = null;
   this.Ractive = Ractive;
 };
 
@@ -111,6 +112,16 @@ App.prototype.initialize = function()
 
       that.commandHistory.push(command);
       that.currentHistoryIndex = 0;
+    }
+    // On other key presses let's check the buffer contents
+    // and do any necessary auto completes
+    // Hard coded for now to look for /r
+    else
+    {
+      if (input.value === '/r' && e.keyCode === 32 && that.lastPMFrom)
+      {
+        input.value = '/message ' + that.lastPMFrom + ' ';
+      }
     }
   });
 

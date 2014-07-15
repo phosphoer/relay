@@ -49,6 +49,7 @@ module.exports = function(appModel)
     else if (to === appModel.nick)
     {
       appModel.addLog('private ' + from, text);
+      appModel.lastPMFrom = from;
     }
   };
 
