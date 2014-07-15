@@ -142,6 +142,7 @@ module.exports = function(appModel)
         var user = chan.getUser(nick);
         var index = chan.users.indexOf(user);
         chan.users.splice(index, 1);
+        chan.addLog('server', nick + ' quit (' + reason + ')');
       }
     }
   };
