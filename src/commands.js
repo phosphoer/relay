@@ -87,6 +87,12 @@ module.exports = function(appModel)
     appModel.currentChannel.clear();
   };
 
+  commands.checkupdate = function()
+  {
+    appModel.addLog('app', 'Checking for updates');
+    appModel.checkForUpdate();
+  };
+
   commands.help = function()
   {
     appModel.addLog('app', 'Commands');

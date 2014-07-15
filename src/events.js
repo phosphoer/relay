@@ -60,8 +60,7 @@ module.exports = function(appModel)
     {
       var chan = new Channel(channel, appModel);
       appModel.channels.push(chan);
-      appModel.currentChannel = chan;
-      appModel.logUI.update();
+      chan.activate();
     }
     else
     {

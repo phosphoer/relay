@@ -65,6 +65,7 @@ App.prototype.initialize = function()
   {
     el: 'logContainer',
     template: '#logTemplate',
+    magic: true,
     data:
     {
       user: this
@@ -91,77 +92,6 @@ App.prototype.initialize = function()
       this.channels[0].logs[this.channels[0].logs.length - 1].isIrcLink = true;
       this.channels[0].logs[this.channels[0].logs.length - 1].ircLink = i;
     }
-  }
-
-  // Get app directory
-  var path = require('path');
-  var appPath = path.dirname(process.execPath);
-  if (appPath.indexOf('Frameworks/node-webkit Helper.app/Contents/MacOS') > 0)
-  {
-    appPath = path.resolve(appPath, '..', '..', '..', '..', '..', '..');
-  }
-
-  var downloadUpdate = function(url, callback)
-  {
-    var http = require('https');
-    var file = fs.createWriteStream(appPath + '/package_new.nw');
-    var request = http.get(url, function(response)
-    {
-      if (response.statusCode === 302)
-      {
-        console.log('download redirecting');
-        downloadUpdate(response.headers.location, callback);
-        return;
-      }
-
-      response.on('data', function(data)
-      {
-        file.write(data);
-      });
-      response.on('end', function()
-      {
-        file.end();
-        callback();
-      });
-    });
-  };
-
-  // Check for updates
-  if (fs.existsSync(appPath + '/package.nw'))
-  {
-    var repo = this.github.releases.listReleases({owner: 'phosphoer', repo: 'relay'}, function(error, releases)
-    {
-      console.log('checking for updates');
-      for (var i = 0; i < releases.length; ++i)
-      {
-        // Find a release with a higher version number
-        var tagName = releases[i].tag_name;
-        tagName = tagName.replace('v', '');
-        var gitHubVersion = tagName.split('.');
-        var packageVersion = packageJSON.version.split('.');
-        if (gitHubVersion[0] > packageVersion[0] || gitHubVersion[1] > packageVersion[1] || gitHubVersion[2] > packageVersion[2])
-        {
-          console.log('found newer release');
-          // Find the package asset
-          for (var j = 0; j < releases[i].assets.length; ++j)
-          {
-            var asset = releases[i].assets[j];
-            if (asset.name === 'package.nw')
-            {
-              downloadUpdate(asset.browser_download_url, function()
-              {
-                console.log('download complete');
-                if (fs.existsSync(appPath + '/package.nw'))
-                  fs.unlinkSync(appPath + '/package.nw');
-                fs.renameSync(appPath + '/package_new.nw', appPath + '/package.nw');
-                that.addLog('app', 'update downloaded, restart to apply');
-              });
-              break;
-            }
-          }
-        }
-      }
-    });
   }
 
   // Handle enter press on input
@@ -224,6 +154,8 @@ App.prototype.initialize = function()
 
     return false;
   };
+
+  this.checkForUpdate();
 };
 
 App.prototype.sendMessage = function(message)
@@ -293,6 +225,83 @@ App.prototype.getSave = function()
 App.prototype.setSave = function(save)
 {
   window.localStorage['relay-save'] = JSON.stringify(save);
+};
+
+App.prototype.checkForUpdate = function()
+{
+  var that = this;
+
+  // Get app directory
+  var path = require('path');
+  var appPath = path.dirname(process.execPath);
+  if (appPath.indexOf('Frameworks/node-webkit Helper.app/Contents/MacOS') > 0)
+  {
+    appPath = path.resolve(appPath, '..', '..', '..', '..', '..', '..');
+  }
+
+  var downloadUpdate = function(url, callback)
+  {
+    var http = require('https');
+    var file = fs.createWriteStream(appPath + '/package_new.nw');
+    var request = http.get(url, function(response)
+    {
+      if (response.statusCode === 302)
+      {
+        console.log('download redirecting');
+        downloadUpdate(response.headers.location, callback);
+        return;
+      }
+
+      response.on('data', function(data)
+      {
+        file.write(data);
+      });
+      response.on('end', function()
+      {
+        file.end();
+        callback();
+      });
+    });
+  };
+
+  // Check for updates
+  if (fs.existsSync(appPath + '/package.nw'))
+  {
+    var repo = this.github.releases.listReleases({owner: 'phosphoer', repo: 'relay'}, function(error, releases)
+    {
+      console.log('checking for updates');
+      for (var i = 0; i < releases.length; ++i)
+      {
+        // Find a release with a higher version number
+        var tagName = releases[i].tag_name;
+        tagName = tagName.replace('v', '');
+        var gitHubVersion = tagName.split('.');
+        var packageVersion = packageJSON.version.split('.');
+        if ((gitHubVersion[0] > packageVersion[0] || gitHubVersion[1] > packageVersion[1] || gitHubVersion[2] > packageVersion[2])
+            && gitHubVersion.length > 2)
+        {
+          console.log('found newer release');
+          // Find the package asset
+          for (var j = 0; j < releases[i].assets.length; ++j)
+          {
+            var asset = releases[i].assets[j];
+            if (asset.name === 'package.nw')
+            {
+              downloadUpdate(asset.browser_download_url, function()
+              {
+                console.log('download complete');
+                if (fs.existsSync(appPath + '/package.nw'))
+                  fs.unlinkSync(appPath + '/package.nw');
+                fs.renameSync(appPath + '/package_new.nw', appPath + '/package.nw');
+                that.addLog('app', 'update downloaded, restart to apply');
+              });
+              break;
+            }
+          }
+        }
+      }
+    });
+  }
 };
 
 module.exports = App;

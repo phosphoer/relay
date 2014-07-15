@@ -94,7 +94,7 @@ body
   cursor: pointer;    
 }
 
-.channel-item[data-active='false']
+.channel-item[data-active='true']
 {
   background: #5a5;
 }
@@ -153,6 +153,13 @@ body
 
 .log-item-message
 {
+}
+
+.log-item-time
+{
+  margin-left: 5px;
+  color: #888;
+  font-size: 12px;
 }
 
 .log-item-image

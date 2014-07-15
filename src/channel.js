@@ -5,7 +5,7 @@ module.exports = function(name, appModel)
   this.name = name || 'channel';
   this.logs = [];
   this.users = [];
-  this.active = false;
+  this.active = true;
 
   this.scrollLatest = function()
   {
@@ -24,9 +24,13 @@ module.exports = function(name, appModel)
 
   this.activate = function()
   {
+    for (var i = 0; i < appModel.channels.length; ++i)
+      appModel.channels[i].active = false;
+    this.active = true;
     appModel.currentChannel = this;
     appModel.logUI.update();
     appModel.usersUI.update();
+    appModel.channelsUI.update();
     this.scrollLatest();
   };
 
