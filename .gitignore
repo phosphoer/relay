@@ -1,6 +1,6 @@
 node_modules/
 .app/
-app/
+bin/
 *.sublime-workspace
 *.exe
 *.dll
