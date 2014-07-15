@@ -135,8 +135,11 @@ App.prototype.initialize = function()
       for (var i = 0; i < releases.length; ++i)
       {
         // Find a release with a higher version number
-        var version = parseFloat(releases[i].tag_name.replace('v', ''));
-        if (version > parseFloat(packageJSON.version))
+        var tagName = releases[i].tag_name;
+        tagName = tagName.replace('v', '');
+        var gitHubVersion = tagName.split('.');
+        var packageVersion = packageJSON.version.split('.');
+        if (gitHubVersion[0] > packageVersion[0] || gitHubVersion[1] > packageVersion[1] || gitHubVersion[2] > packageVersion[2])
         {
           console.log('found newer release');
           // Find the package asset
