@@ -10,6 +10,8 @@ module.exports = function(appModel, sender, message)
   this.isIrcLink = false;
   this.type = '';
   this.from = sender;
+  this.timestamp = require('moment')();
+  this.nextUpdate = 10000;
 
   // Detect a message with a link
   var match = message.match(/((http:.+)|(https:.+))/);
@@ -68,4 +70,14 @@ module.exports = function(appModel, sender, message)
       }
     }
   };
+
+  this.updateTimeStamp = function()
+  {
+    this.prettyTime = this.timestamp.fromNow();
+
+    setTimeout(this.updateTimeStamp.bind(this), this.nextUpdate);
+    this.nextUpdate *= 1.5;
+  };
+
+  this.updateTimeStamp();
 };

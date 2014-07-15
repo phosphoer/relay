@@ -5,7 +5,7 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/phosphoer/relay.git"
-  },  
+  },
   "webkit": {
     "page-cache": false
   },
@@ -21,6 +21,7 @@
     "gulp-zip": "^0.4.0",
     "imgur": "0.0.3",
     "irc": "^0.3.7",
+    "moment": "^2.7.0",
     "underscore": "^1.6.0"
   }
 }

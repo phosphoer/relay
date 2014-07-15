@@ -65,6 +65,7 @@ App.prototype.initialize = function()
   {
     el: 'logContainer',
     template: '#logTemplate',
+    magic: true,
     data:
     {
       user: this
@@ -228,6 +229,8 @@ App.prototype.setSave = function(save)
 
 App.prototype.checkForUpdate = function()
 {
+  var that = this;
+
   // Get app directory
   var path = require('path');
   var appPath = path.dirname(process.execPath);
@@ -274,7 +277,8 @@ App.prototype.checkForUpdate = function()
         tagName = tagName.replace('v', '');
         var gitHubVersion = tagName.split('.');
         var packageVersion = packageJSON.version.split('.');
-        if (gitHubVersion[0] > packageVersion[0] || gitHubVersion[1] > packageVersion[1] || gitHubVersion[2] > packageVersion[2])
+        if ((gitHubVersion[0] > packageVersion[0] || gitHubVersion[1] > packageVersion[1] || gitHubVersion[2] > packageVersion[2])
+            && gitHubVersion.length > 2)
         {
           console.log('found newer release');
           // Find the package asset

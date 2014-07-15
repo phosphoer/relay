@@ -153,6 +153,13 @@ body
 {
 }
 
+.log-item-time
+{
+  margin-left: 5px;
+  color: #888;
+  font-size: 12px;
+}
+
 .log-item-image
 {
   display: block;
