@@ -177,6 +177,7 @@ App.prototype.initialize = function()
         that.sendMessage(command);
 
       that.commandHistory.push(command);
+      that.currentHistoryIndex = 0;
     }
   });
 
@@ -185,19 +186,16 @@ App.prototype.initialize = function()
   {
     if (e.keyCode === 38)
     {
-      ++that.currentHistoryIndex;
-      if (that.currentHistoryIndex >= that.commandHistory.length)
-        that.currentHistoryIndex = that.commandHistory.length - 1;
-      var cmd = that.commandHistory[(that.commandHistory.length - that.currentHistoryIndex) - 1];
+      var cmd = that.commandHistory[that.commandHistory.length - that.currentHistoryIndex - 1];
       if (cmd)
         input.value = cmd;
+      
+      that.currentHistoryIndex = Math.min(that.currentHistoryIndex + 1, that.commandHistory.length - 1);
     }
     if (e.keyCode === 40)
     {
-      --that.currentHistoryIndex;
-      if (that.currentHistoryIndex < 0)
-        that.currentHistoryIndex = 0;
-      var cmd = that.commandHistory[(that.commandHistory.length - that.currentHistoryIndex) - 1];
+      that.currentHistoryIndex = Math.max(that.currentHistoryIndex - 1, 0);
+      var cmd = that.commandHistory[that.commandHistory.length - that.currentHistoryIndex - 1];
       if (cmd)
         input.value = cmd;
     }

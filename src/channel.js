@@ -7,14 +7,19 @@ module.exports = function(name, appModel)
   this.users = [];
   this.active = false;
 
-  this.addLog = function(sender, message)
+  this.scrollLatest = function()
   {
-    this.logs.push(new Log(appModel, sender, message));
     if (appModel.currentChannel === this)
     {
       var logWin = window.document.querySelector('.log-window');
       logWin.scrollTop = logWin.scrollHeight;
     }
+  }
+
+  this.addLog = function(sender, message)
+  {
+    this.logs.push(new Log(appModel, sender, message));
+    this.scrollLatest();
   };
 
   this.activate = function()
@@ -22,6 +27,7 @@ module.exports = function(name, appModel)
     appModel.currentChannel = this;
     appModel.logUI.update();
     appModel.usersUI.update();
+    this.scrollLatest();
   };
 
   this.clear = function()
