@@ -93,6 +93,141 @@ App.prototype.initialize = function()
     }
   }
 
+  // Handle enter press on input
+  var input = window.document.querySelector('.user-input');
+  input.addEventListener('keydown', function(e)
+  {
+    // Hit enter on the keyboard
+    if (e.keyCode === 13)
+    {
+      var command = input.value;
+      input.value = '';
+
+      // Try parsing input as a command, otherwise send it as a
+      // message
+      if (!that.parseCommand(command))
+        that.sendMessage(command);
+
+      that.commandHistory.push(command);
+      that.currentHistoryIndex = 0;
+    }
+  });
+
+  // Handle up arrow press
+  window.addEventListener('keydown', function(e)
+  {
+    if (e.keyCode === 38)
+    {
+      var cmd = that.commandHistory[that.commandHistory.length - that.currentHistoryIndex - 1];
+      if (cmd)
+        input.value = cmd;
+      
+      that.currentHistoryIndex = Math.min(that.currentHistoryIndex + 1, that.commandHistory.length - 1);
+    }
+    if (e.keyCode === 40)
+    {
+      that.currentHistoryIndex = Math.max(that.currentHistoryIndex - 1, 0);
+      var cmd = that.commandHistory[that.commandHistory.length - that.currentHistoryIndex - 1];
+      if (cmd)
+        input.value = cmd;
+    }
+  });
+
+  // Handle file drop
+  window.ondragover = function(e) { e.preventDefault(); return false };
+  window.ondrop = function(e)
+  {
+    e.preventDefault();
+
+    // for (var i = 0; i < e.dataTransfer.files.length; ++i)
+    // {
+    //   var path = e.dataTransfer.files[i].path;
+    //   if (path.match(/(.png|.gif|.jpg|.jpeg)$/))
+    //   {
+    //     imgur.upload(path, function(response)
+    //     {
+    //       console.log(response);
+    //     });
+    //   }
+    // }
+
+    return false;
+  };
+
+  this.checkForUpdate();
+};
+
+App.prototype.sendMessage = function(message)
+{
+  this.addLog(this.nick, message);
+  this.commands.message(this.currentChannel.name, message);
+};
+
+App.prototype.parseCommand = function(message)
+{
+  if (message[0] !== '/' && message[0] !== '\\')
+    return false;
+
+  var parts = message.split(' ');
+  var command = parts[0].slice(1);
+  var args = parts.slice(1);
+
+  if (command in this.commands)
+  {
+    this.addLog('>', message);
+    this.commands[command].apply(this.commands, args);
+  }
+  else
+  {
+    this.addLog('x', message);
+  }
+
+  return true;
+};
+
+App.prototype.setupListeners = function()
+{
+  for (var i in this.events)
+    this.client.addListener(i, this.events[i]);
+};
+
+App.prototype.resetChannels = function()
+{
+  this.channels = [this.defaultChannel];
+  this.currentChannel = this.channels[0];
+  this.channelsUI.update();
+  this.logUI.update();
+  this.usersUI.update();
+};
+
+App.prototype.getChannel = function(name)
+{
+  for (var i = 0; i < this.channels.length; ++i)
+    if (this.channels[i].name === name)
+      return this.channels[i];
+};
+
+App.prototype.addLog = function(sender, message)
+{
+  this.currentChannel.addLog(sender, message);
+  var logWin = window.document.querySelector('.log-window');
+  logWin.scrollTop = logWin.scrollHeight;    
+};
+
+App.prototype.getSave = function()
+{
+  if (!window.localStorage['relay-save'])
+    window.localStorage['relay-save'] = JSON.stringify({});
+  return JSON.parse(window.localStorage['relay-save']);
+};
+
+App.prototype.setSave = function(save)
+{
+  window.localStorage['relay-save'] = JSON.stringify(save);
+};
+
+App.prototype.checkForUpdate = function()
+{
   // Get app directory
   var path = require('path');
   var appPath = path.dirname(process.execPath);
@@ -163,136 +298,6 @@ App.prototype.initialize = function()
       }
     });
   }
-
-  // Handle enter press on input
-  var input = window.document.querySelector('.user-input');
-  input.addEventListener('keydown', function(e)
-  {
-    // Hit enter on the keyboard
-    if (e.keyCode === 13)
-    {
-      var command = input.value;
-      input.value = '';
-
-      // Try parsing input as a command, otherwise send it as a
-      // message
-      if (!that.parseCommand(command))
-        that.sendMessage(command);
-
-      that.commandHistory.push(command);
-      that.currentHistoryIndex = 0;
-    }
-  });
-
-  // Handle up arrow press
-  window.addEventListener('keydown', function(e)
-  {
-    if (e.keyCode === 38)
-    {
-      var cmd = that.commandHistory[that.commandHistory.length - that.currentHistoryIndex - 1];
-      if (cmd)
-        input.value = cmd;
-      
-      that.currentHistoryIndex = Math.min(that.currentHistoryIndex + 1, that.commandHistory.length - 1);
-    }
-    if (e.keyCode === 40)
-    {
-      that.currentHistoryIndex = Math.max(that.currentHistoryIndex - 1, 0);
-      var cmd = that.commandHistory[that.commandHistory.length - that.currentHistoryIndex - 1];
-      if (cmd)
-        input.value = cmd;
-    }
-  });
-
-  // Handle file drop
-  window.ondragover = function(e) { e.preventDefault(); return false };
-  window.ondrop = function(e)
-  {
-    e.preventDefault();
-
-    // for (var i = 0; i < e.dataTransfer.files.length; ++i)
-    // {
-    //   var path = e.dataTransfer.files[i].path;
-    //   if (path.match(/(.png|.gif|.jpg|.jpeg)$/))
-    //   {
-    //     imgur.upload(path, function(response)
-    //     {
-    //       console.log(response);
-    //     });
-    //   }
-    // }
-
-    return false;
-  };
-};
-
-App.prototype.sendMessage = function(message)
-{
-  this.addLog(this.nick, message);
-  this.commands.message(this.currentChannel.name, message);
-};
-
-App.prototype.parseCommand = function(message)
-{
-  if (message[0] !== '/' && message[0] !== '\\')
-    return false;
-
-  var parts = message.split(' ');
-  var command = parts[0].slice(1);
-  var args = parts.slice(1);
-
-  if (command in this.commands)
-  {
-    this.addLog('>', message);
-    this.commands[command].apply(this.commands, args);
-  }
-  else
-  {
-    this.addLog('x', message);
-  }
-
-  return true;
-};
-
-App.prototype.setupListeners = function()
-{
-  for (var i in this.events)
-    this.client.addListener(i, this.events[i]);
-};
-
-App.prototype.resetChannels = function()
-{
-  this.channels = [this.defaultChannel];
-  this.currentChannel = this.channels[0];
-  this.channelsUI.update();
-  this.logUI.update();
-  this.usersUI.update();
-};
-
-App.prototype.getChannel = function(name)
-{
-  for (var i = 0; i < this.channels.length; ++i)
-    if (this.channels[i].name === name)
-      return this.channels[i];
-};
-
-App.prototype.addLog = function(sender, message)
-{
-  this.currentChannel.addLog(sender, message);
-  var logWin = window.document.querySelector('.log-window');
-  logWin.scrollTop = logWin.scrollHeight;    
-};
-
-App.prototype.getSave = function()
-{
-  if (!window.localStorage['relay-save'])
-    window.localStorage['relay-save'] = JSON.stringify({});
-  return JSON.parse(window.localStorage['relay-save']);
-};
-
-App.prototype.setSave = function(save)
-{
-  window.localStorage['relay-save'] = JSON.stringify(save);
 };
 
 module.exports = App;
