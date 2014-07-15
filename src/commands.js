@@ -46,7 +46,10 @@ module.exports = function(appModel)
 
   commands.join = function(channel)
   {
-    appModel.client.join(channel);
+    if (channel)
+      appModel.client.join(channel);
+    else
+      appModel.addLog('error', 'Please specify a channel name');
   };
 
   commands.part = function(channel, message)
