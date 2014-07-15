@@ -59,6 +59,8 @@ body
   margin-bottom: 5px;
   color: #ddd;
   background: #55a;
+  -webkit-user-select: none;
+  cursor: pointer;  
 }
 
 .users-item-name
@@ -75,8 +77,6 @@ body
   background: #222;
   padding: 5px;
   box-sizing: border-box;
-  -webkit-user-select: none;
-  cursor: hand;
 }
 
 .channel-item
@@ -90,6 +90,8 @@ body
   margin-right: 10px;
   color: #ddd;
   background: #555;
+  -webkit-user-select: none;
+  cursor: pointer;    
 }
 
 .channel-item[data-active='false']
