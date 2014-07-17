@@ -50,7 +50,7 @@ module.exports = function(appModel, sender, message)
     {
       this.imgDisplay = 'none';
       this.linkDisplay = '';
-      logUI.update();
+      appModel.logUI.update();
     }
 
     // Handle clicking a suggested IRC server link
