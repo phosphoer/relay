@@ -55,8 +55,6 @@ module.exports = function(appModel)
 
   events.join = function(channel, nick)
   {
-    appModel.addLog('server', nick + ' has joined ' + channel);
-
     if (nick === appModel.nick)
     {
       var chan = new Channel(channel, appModel);
@@ -69,13 +67,12 @@ module.exports = function(appModel)
       chan.users.push(new User(appModel, nick));
     }
 
+    appModel.addLog('server', nick + ' has joined ' + channel);
     appModel.usersUI.update();
   };
 
   events.part = function(channel, nick, reason)
   {
-    appModel.addLog('server', nick + ' has left ' + channel + ' (' + reason + ')');
-
     if (nick === appModel.nick)
     {
       for (var i = 0; i < appModel.channels.length; ++i)
@@ -84,27 +81,22 @@ module.exports = function(appModel)
         {
           appModel.channels.splice(i, 1);
           appModel.currentChannel = appModel.channels[i] || appModel.channels[i - 1];
-          appModel.logUI.update();
           break;
         }
       }
     }
     else
     {
+      appModel.addLog('server', nick + ' has left ' + channel);
       var chan = appModel.getChannel(channel);
       var user = chan.getUser(nick);
       var index = chan.users.indexOf(user);
       chan.users.splice(index, 1);
     }
 
+    appModel.logUI.update();
     appModel.usersUI.update();
   };
-
-  // This seems to be redundant with the message event?
-  // events.pm = function(from, text)
-  // {
-  //   appModel.addLog(new Log('PM ' + from, text));
-  // };
 
   events.nick = function(oldNick, newNick, channels)
   {
