@@ -11,7 +11,11 @@
   },
   "window": {
     "title": "Relay",
-    "toolbar": false
+    "toolbar": false,
+    "width": 700,
+    "height": 450,
+    "min_width": 700,
+    "min_height": 450
   },
   "devDependencies": {
     "github": "^0.2.1",
