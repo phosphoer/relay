@@ -7,7 +7,7 @@
   var zip = require('gulp-zip');
   var rimraf = require('gulp-rimraf');
 
-  var modules = ['github', 'imgur', 'irc', 'underscore', 'moment'];
+  var modules = ['github', 'imgur', 'irc', 'underscore', 'moment', 'fast-levenshtein'];
 
   // Main build task
   gulp.task('default', function()

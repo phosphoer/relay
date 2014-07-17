@@ -1,10 +1,12 @@
+var _ = require('underscore');
 var Channel = require('./channel');
+var fs = require('fs');
+var GithubAPI = require('github');
+var imgur = require('imgur');
+var irc = require('irc');
+var levenshtein = require('fast-levenshtein');
 var Log = require('./log');
 var packageJSON = require('./package.json');
-var irc = require('irc');
-var imgur = require('imgur');
-var GithubAPI = require('github');
-var fs = require('fs');
 
 var App = function(Ractive)
 {
@@ -191,7 +193,21 @@ App.prototype.parseCommand = function(message)
   }
   else
   {
-    this.addLog('x', message);
+    this.possible = _.keys(this.commands);
+    var closest = _.min(_.keys(this.commands), function(candidate)
+    {
+       return levenshtein.get(command, candidate);
+    });
+
+    if (levenshtein.get(command, closest) <= 2)
+    {
+      this.addLog('>', message);
+      this.commands[closest].apply(this.commands, args);
+    }
+    else
+    {
+      this.addLog('x', message);
+    }
   }
 
   return true;

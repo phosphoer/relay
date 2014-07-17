@@ -27,5 +27,8 @@
     "irc": "^0.3.7",
     "moment": "^2.7.0",
     "underscore": "^1.6.0"
+  },
+  "dependencies": {
+    "fast-levenshtein": "^1.0.3"
   }
 }
