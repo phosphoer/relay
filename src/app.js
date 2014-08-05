@@ -85,8 +85,14 @@ App.prototype.initialize = function()
     }
   }
 
-  // Handle enter press on input
+  // Focus input on any key press
   var input = window.document.querySelector('.user-input');
+  window.addEventListener('keydown', function(e)
+  {
+    input.focus();
+  });
+
+  // Handle enter press on input
   input.addEventListener('keydown', function(e)
   {
     // Hit enter on the keyboard

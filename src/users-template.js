@@ -17,7 +17,7 @@ module.exports = function(Ractive)
     {
       this.on('activate', function(e)
       {
-        e.context.activate();
+        e.context.activate(e);
       });
     }
   });
