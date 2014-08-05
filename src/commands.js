@@ -93,6 +93,11 @@ module.exports = function(appModel)
     appModel.checkForUpdate();
   };
 
+  commands.debug = function()
+  {
+    window.require('nw.gui').Window.get().showDevTools();
+  };
+
   commands.help = function()
   {
     appModel.addLog('app', 'Commands');
