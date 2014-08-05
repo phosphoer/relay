@@ -98,6 +98,11 @@ module.exports = function(appModel)
     window.require('nw.gui').Window.get().showDevTools();
   };
 
+  commands.reload = function()
+  {
+    window.require('nw.gui').Window.get().reload();
+  };
+
   commands.help = function()
   {
     appModel.addLog('app', 'Commands');

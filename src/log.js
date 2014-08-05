@@ -11,10 +11,10 @@ module.exports = function(appModel, sender, message)
   this.type = '';
   this.from = sender;
   this.timestamp = require('moment')();
-  this.nextUpdate = 10000;
+  this.nextUpdate = 60000;
 
   // Detect a message with a link
-  var match = message.match(/((http:.+)|(https:.+))/);
+  var match = message.match(/((http:.+)|(https:.+)|www\..+)/);
   if (match && match.index >= 0)
   {
     var url = match[1];
