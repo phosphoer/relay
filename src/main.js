@@ -1,3 +1,5 @@
+process.on("uncaughtException", function(e) { });
+
 var gui = window.require('nw.gui');
 var App = window.require('./app.js');
 

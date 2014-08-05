@@ -1,10 +1,10 @@
 var _ = require('underscore');
-var Channel = require('./channel');
 var fs = require('fs');
 var GithubAPI = require('github');
 var imgur = require('imgur');
 var irc = require('irc');
 var levenshtein = require('fast-levenshtein');
+var Channel = require('./channel');
 var Log = require('./log');
 var packageJSON = require('./package.json');
 
@@ -33,50 +33,38 @@ App.prototype.initialize = function()
   imgur.setKey('8fe3c8f3a95d595');
 
   var that = this;
+
   // Build channels window
-  this.channelsUI = new this.Ractive(
+  var ChannelTemplate = require('./channel-template.js')(this.Ractive);
+  this.channelsUI = new ChannelTemplate(
   {
     el: 'channelContainer',
-    template: '#channelsTemplate',
     data:
     {
       user: this
     }
-  });
-  this.channelsUI.on('activate', function(e)
-  {
-    e.context.activate();
   });
 
   // Build user window
-  this.usersUI = new this.Ractive(
+  var UsersTemplate = require('./users-template.js')(this.Ractive);
+  this.usersUI = new UsersTemplate(
   {
     el: 'usersContainer',
-    template: '#usersTemplate',
     data:
     {
       user: this
     }
-  });
-  this.usersUI.on('activate', function(e)
-  {
-    e.context.activate();
   });
 
   // Build log window
-  this.logUI = new this.Ractive(
+  var LogsTemplate = require('./logs-template.js')(this.Ractive);
+  this.logUI = new LogsTemplate(
   {
     el: 'logContainer',
-    template: '#logTemplate',
-    magic: true,
     data:
     {
       user: this
     }
-  });
-  this.logUI.on('activate', function(e)
-  {
-    e.context.activate(e);
   });
 
   // Default message
@@ -238,8 +226,6 @@ App.prototype.getChannel = function(name)
 App.prototype.addLog = function(sender, message)
 {
   this.currentChannel.addLog(sender, message);
-  var logWin = window.document.querySelector('.log-window');
-  logWin.scrollTop = logWin.scrollHeight;    
 };
 
 App.prototype.getSave = function()

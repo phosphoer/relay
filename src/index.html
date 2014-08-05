@@ -2,7 +2,7 @@
   <head>
     <script src='main.js'></script>
     <link rel='stylesheet' href='style.css' />
-    <script src='ractive.js'></script>
+    <script src='node_modules/ractive/ractive.js'></script>
   </head>
 
   <body>
@@ -15,48 +15,7 @@
     <div id='logContainer'></div>
     <div id='usersContainer'></div>
 
-    <!-- User input box -->
     <input class='user-input' autofocus placeholder="Type here" type='text'></input>
-
-    <!-- Templates -->
-    <!-- Channels window template -->
-    <script id='channelsTemplate' type='text/ractive'>
-      <div class='channel-window'>
-        {{#user.channels}}
-          <div class='channel-item' data-active='{{active}}' on-click='activate'>
-            <span class='channel-item-name'>{{name}}</span>
-          </div>
-        {{/user.channels}}
-      </div>
-    </script>
-
-    <!-- Users window template -->
-    <script id='usersTemplate' type='text/ractive'>
-      <div class='users-window'>
-        {{#user.currentChannel.users}}
-          <div class='users-item' on-click='activate'>
-            <span class='users-item-name'>{{name}}</span>
-          </div>
-        {{/user.currentChannel.users}}
-      </div>
-    </script>
-
-    <!-- Log window template -->
-    <script id='logTemplate' type='text/ractive'>
-      <div class='log-window'>
-        {{#user.currentChannel.logs}}
-          <div class='log-item-wrapper' on-mousedown='activate'>
-            <div class='log-item' data-from='{{from}}'>
-              <span class='log-item-from'>{{sender}}</span>
-              <span class='log-item-message'>{{message}}</span>
-              <a target="_blank" class='log-item-link' href='{{linkHref}}' style='display: {{linkDisplay}};'>{{linkHref}}</a>
-              <a target="_blank" href='{{imgSrc}}' style='display: {{imgDisplay}};'><img class='log-item-image' src='{{imgSrc}}' /></a>
-              <span class='log-item-time'>{{prettyTime}}</span>
-            </div>
-          </div>
-        {{/user.currentChannel.logs}}
-      </div>
-    </script>
 
   </body>
 </html>

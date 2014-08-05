@@ -7,7 +7,7 @@
   var zip = require('gulp-zip');
   var rimraf = require('gulp-rimraf');
 
-  var modules = ['github', 'imgur', 'irc', 'underscore', 'moment', 'fast-levenshtein'];
+  var modules = ['github', 'imgur', 'irc', 'underscore', 'moment', 'fast-levenshtein', 'ractive'];
 
   // Main build task
   gulp.task('default', function()
@@ -26,14 +26,15 @@
     for (var i = 0; i < modules.length; ++i)
     {
       gulp.src('node_modules/' + modules[i] + '/**/*')
+      .pipe(gulp.dest('bin/node_modules/' + modules[i]))
       .pipe(gulp.dest('bin/package/node_modules/' + modules[i]));
     }
 
     setTimeout(function()
     {
-    gulp.src('bin/package/**/*')
-    .pipe(zip('package.nw'))
-    .pipe(gulp.dest('bin/app'));
+      gulp.src('bin/package/**/*')
+      .pipe(zip('package.nw'))
+      .pipe(gulp.dest('bin/app'));
     }, 500);
   });
 
