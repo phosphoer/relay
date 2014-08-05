@@ -296,7 +296,7 @@ App.prototype.checkForUpdate = function()
         tagName = tagName.replace('v', '');
         var gitHubVersion = tagName.split('.');
         var packageVersion = packageJSON.version.split('.');
-        if ((gitHubVersion[0] > packageVersion[0] || gitHubVersion[1] > packageVersion[1] || gitHubVersion[2] > packageVersion[2])
+        if ((gitHubVersion.length > packageVersion.length || gitHubVersion[0] > packageVersion[0] || gitHubVersion[1] > packageVersion[1] || gitHubVersion[2] > packageVersion[2])
             && gitHubVersion.length > 2)
         {
           console.log('found newer release');
