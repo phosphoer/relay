@@ -90,7 +90,7 @@ App.prototype.initialize = function()
   input.addEventListener('keydown', function(e)
   {
     // Hit enter on the keyboard
-    if (e.keyCode === 13)
+    if (e.keyCode === 13 && input.value)
     {
       var command = input.value;
       input.value = '';
