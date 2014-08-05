@@ -18,18 +18,18 @@
     "min_height": 450
   },
   "devDependencies": {
-    "github": "^0.2.1",
     "gulp": "^3.8.5",
     "gulp-concat": "^2.2.0",
     "gulp-rimraf": "^0.1.0",
-    "gulp-zip": "^0.4.0",
-    "imgur": "0.0.3",
-    "irc": "^0.3.7",
-    "moment": "^2.7.0",
-    "ractive": "^0.5.5",
-    "underscore": "^1.6.0"
+    "gulp-zip": "^0.4.0"
   },
   "dependencies": {
+    "underscore": "^1.6.0",
+    "ractive": "^0.5.5",
+    "moment": "^2.7.0",
+    "irc": "^0.3.7",
+    "imgur": "0.0.3",
+    "github": "^0.2.1",
     "fast-levenshtein": "^1.0.3"
   }
 }

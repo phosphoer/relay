@@ -6,8 +6,9 @@
   var concat = require('gulp-concat');
   var zip = require('gulp-zip');
   var rimraf = require('gulp-rimraf');
+  var pkg = require('./package.json');
 
-  var modules = ['github', 'imgur', 'irc', 'underscore', 'moment', 'fast-levenshtein', 'ractive'];
+  var modules = Object.keys(pkg.dependencies);
 
   // Main build task
   gulp.task('default', function()
