@@ -124,6 +124,13 @@ module.exports = function(appModel)
     appModel.usersUI.update();
   };
 
+  events.topic = function(channel, topic, nick)
+  {
+    var chan = appModel.getChannel(channel);
+    if (chan)
+      chan.addLog('server', 'topic set to: \'' + topic + '\' by ' + nick);
+  };
+
   events.quit = function(nick, reason, channels)
   {
     for (var i = 0; i < channels.length; ++i)

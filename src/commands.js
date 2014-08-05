@@ -82,6 +82,13 @@ module.exports = function(appModel)
     }
   };
 
+  commands.topic = function(topic)
+  {
+    var messageParts = Array.prototype.slice.call(arguments, 0);
+    var message = messageParts.join(' ');
+    appModel.client.send('TOPIC', appModel.currentChannel.name, message);
+  };
+
   commands.clear = function()
   {
     appModel.currentChannel.clear();
