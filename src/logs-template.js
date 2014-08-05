@@ -3,7 +3,7 @@ var template =
   '<div class="log-window">',
   '  {{#user.currentChannel.logs}}',
   '    <div class="log-item-wrapper" on-mousedown="activate">',
-  '      <div class="log-item" data-from="{{from}}">',
+  '      <div class="log-item" data-from="{{from}}" data-isirc="{{isIrcLink}}">',
   '        <span class="log-item-from">{{sender}}</span>',
   '        <span class="log-item-message">{{message}}</span>',
   '        <a target="_blank" class="log-item-link" href="{{linkHref}}" style="display: {{linkDisplay}};">{{linkHref}}</a>',

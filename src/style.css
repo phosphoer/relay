@@ -145,6 +145,11 @@ body
   color: #55d;
 }
 
+.log-item[data-isirc]
+{
+  cursor: pointer;
+}
+
 .log-item-from:after
 {
   content: ' ';

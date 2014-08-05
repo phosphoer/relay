@@ -14,21 +14,23 @@ module.exports = function(appModel, sender, message)
   this.nextUpdate = 60000;
 
   // Detect a message with a link
-  var match = message.match(/((http:.+)|(https:.+)|www\..+)/);
+  var match = message.match(/((http:.+)|(https:.+)|(www\.).+\.\w+)/);
   if (match && match.index >= 0)
   {
     var url = match[1];
-
+    var linkUrl = url;
+    if (linkUrl.indexOf('http') !== 0)
+      linkUrl = 'http://' + url;
     if (/(.png|.gif|.jpg|.jpeg)$/.test(url))
     {
-      this.imgSrc = url;
-      this.linkHref = url;
+      this.imgSrc = linkUrl;
+      this.linkHref = linkUrl;
       this.imgDisplay = '';
       this.message = this.message.replace(url, '');
     }
     else
     {
-      this.linkHref = url;
+      this.linkHref = linkUrl;
       this.linkDisplay = '';
       this.message = this.message.replace(url, '');
     }
